@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hiện trạng phòng">
+<title>Quản lý hiện trạng phòng</title>
+<style>
+:root{
+  --ground:#E7EAEC; --paper:#FFFFFF; --ink:#0E1216; --ink-2:#4A555E; --ink-3:#8A959D;
+  --line:#D4D9DD; --line-2:#E6EAED;
+  --pine:#12514A;
+  --ok:#2C7A4B; --clean:#A9640B; --refill:#1F6099; --replace:#9E3418; --broken:#6E1616;
+  --tape:#F2C230; --r:12px;
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--ground);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+h1,h2{margin:0;font-weight:650;letter-spacing:-.02em}
+
+#app{max-width:820px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+#top{position:sticky;top:0;z-index:30;background:rgba(231,234,236,.93);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);backdrop-filter:saturate(180%) blur(14px);
+  padding:calc(var(--safe-t) + 10px) 16px 10px;border-bottom:1px solid var(--line)}
+#top .bar{display:flex;align-items:center;gap:8px;min-height:32px}
+#top h1{font-size:19px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.back{font-size:15px;color:var(--pine);font-weight:600;padding:4px 6px 4px 0;flex:none}
+#view{flex:1;padding:14px 16px calc(150px + var(--safe-b))}
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;background:rgba(255,255,255,.95);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:var(--safe-b)}
+#tabs .t{flex:1;padding:8px 1px 7px;text-align:center;color:var(--ink-3);font-size:9.5px;font-weight:600;letter-spacing:-.01em}
+#tabs .t b{display:block;font-size:18px;line-height:1.25;font-weight:400}
+#tabs .t.on{color:var(--pine)}
+#tabs.hide{display:none}
+
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.muted{color:var(--ink-2);font-size:13.5px}
+.btn{display:block;width:100%;text-align:center;background:var(--pine);color:#fff;border-radius:10px;
+  padding:12px 16px;font-weight:650;font-size:15px}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:#fff;color:var(--replace);border:1px solid #E3BDB2}
+.btn:active{opacity:.72}
+.btn[disabled]{opacity:.4}
+input[type=text],input[type=number],input[type=email],input[type=password]{width:100%;background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:10px 11px;font-size:16px}
+label.f{display:block;margin-bottom:11px}
+label.f span{display:block;font-size:12.5px;font-weight:650;color:var(--ink-2);margin-bottom:5px}
+.hr{height:1px;background:var(--line-2);margin:12px -14px}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.pill.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.empty{text-align:center;padding:34px 18px;color:var(--ink-2)}
+.empty b{display:block;font-size:15px;color:var(--ink);margin-bottom:5px}
+
+.st-ok{--c:var(--ok)} .st-clean{--c:var(--clean)} .st-refill{--c:var(--refill)}
+.st-replace{--c:var(--replace)} .st-broken{--c:var(--broken)} .st-none{--c:var(--ink-3)}
+.dot{width:9px;height:9px;border-radius:3px;background:var(--c);flex:none}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;color:var(--c);border:1px solid currentColor;
+  border-radius:6px;padding:1px 7px;white-space:nowrap}
+
+.hero{background:var(--ink);color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;border-left:5px solid var(--tape)}
+.hero .k{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:#9AA6AE;font-weight:700}
+.hero .big{font-size:40px;font-weight:700;letter-spacing:-.035em;line-height:1.05;margin:2px 0 1px;font-variant-numeric:tabular-nums}
+.hero .big i{font-size:19px;color:#9AA6AE;font-weight:600;font-style:normal}
+.hero .sub{font-size:13.5px;color:#C3CCD2}
+.hero .split{display:flex;gap:14px;margin-top:13px;padding-top:12px;border-top:1px solid #2A3138}
+.hero .split div{flex:1}
+.hero .split .n{font-size:22px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.hero .split .l{font-size:11px;color:#9AA6AE;font-weight:600}
+
+.rack{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:7px}
+.key{background:#fff;border:1px solid var(--line);border-radius:9px;padding:8px 7px 7px;text-align:left;
+  position:relative;overflow:hidden;min-height:62px;display:flex;flex-direction:column;justify-content:space-between}
+.key:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--ink-3))}
+.key .no{font-size:15px;font-weight:700;letter-spacing:-.02em;padding-left:6px;font-variant-numeric:tabular-nums}
+.key .mt{font-size:10.5px;color:var(--ink-3);font-weight:600;padding-left:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.key .cnt{position:absolute;right:5px;top:5px;background:var(--c);color:#fff;font-size:10px;font-weight:700;
+  border-radius:5px;padding:1px 5px;font-variant-numeric:tabular-nums}
+.key.due{box-shadow:inset 0 0 0 2px var(--tape)}
+
+.row{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line-2);width:100%;text-align:left}
+.row:last-child{border-bottom:0}
+.row .main{flex:1;min-width:0}
+.row .t1{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .t2{display:block;font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chev{color:var(--ink-3);font-size:17px;flex:none}
+
+.cat{border:1px solid var(--line);border-radius:var(--r);background:#fff;margin-bottom:9px;overflow:hidden}
+.cat .h{display:flex;align-items:center;gap:10px;padding:13px 14px;width:100%;text-align:left}
+.cat .h .nm{flex:1;font-weight:650;font-size:15px}
+.cat .h .pr{font-size:12px;font-weight:700;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.cat.done .h .pr{color:var(--ok)}
+.item{padding:12px 14px;border-top:1px solid var(--line-2)}
+.item .nm{font-weight:600;font-size:14.5px;margin-bottom:9px;display:flex;gap:8px;align-items:center}
+.sts{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+.sts button{border:1px solid var(--line);border-radius:8px;padding:7px 2px;font-size:10.5px;font-weight:700;
+  color:var(--ink-3);line-height:1.25;background:#fff}
+.sts button.on{background:var(--c);border-color:var(--c);color:#fff}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.th{position:relative;width:62px;height:62px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--line-2)}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th .x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.62);color:#fff;width:19px;height:19px;
+  border-radius:5px;font-size:12px;line-height:19px;text-align:center;padding:0}
+.addph{width:62px;height:62px;border:1px dashed var(--line);border-radius:8px;color:var(--ink-3);font-size:20px;background:#fff}
+
+.sticky{position:fixed;left:0;right:0;bottom:calc(56px + var(--safe-b));z-index:35;padding:10px 16px 12px;
+  background:linear-gradient(to top,var(--ground) 66%,rgba(231,234,236,0));max-width:820px;margin:0 auto}
+.sticky .btn{box-shadow:0 4px 16px rgba(14,18,22,.18)}
+.sticky.nobar{bottom:var(--safe-b)}
+
+#sheet{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(8,10,12,.45)}
+#sheet.on{display:flex}
+#sheet .box{background:var(--paper);border-radius:16px 16px 0 0;width:100%;max-width:820px;
+  padding:16px 16px calc(18px + var(--safe-b));max-height:88vh;overflow:auto;
+  box-shadow:0 -8px 32px rgba(14,18,22,.25)}
+@media (min-width:700px){#sheet{align-items:center}#sheet .box{border-radius:16px;max-width:520px}}
+#lb{position:fixed;inset:0;background:rgba(8,10,12,.94);z-index:90;display:none;align-items:center;justify-content:center;padding:16px}
+#lb img{max-width:100%;max-height:88vh;border-radius:10px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(120px + var(--safe-b));z-index:95;
+  background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;
+  opacity:0;pointer-events:none;transition:opacity .18s;max-width:88%;text-align:center}
+#toast.on{opacity:1}
+#busy{position:fixed;left:0;right:0;top:0;height:3px;background:var(--tape);transform:scaleX(0);
+  transform-origin:left;transition:transform .3s;z-index:99}
+#busy.on{transform:scaleX(.85)}
+:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="busy"></div>
+<div id="app">
+  <header id="top"><div class="bar"><span id="topact"></span><h1 id="ttl">Hiện trạng phòng</h1></div></header>
+  <main id="view"></main>
+</div>
+<nav id="tabs"></nav>
+<div id="sheet"></div>
+<div id="lb"><img id="lbimg" alt=""></div>
+<div id="toast"></div>
+<input type="file" id="picker" accept="image/*" multiple style="display:none">
+<input type="file" id="pickerCam" accept="image/*" capture="environment" style="display:none">
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+/* ============ CẤU HÌNH ============ */
+const SUPABASE_URL = 'https://ukglohmssluajtkghpva.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ2xvaG1zc2x1YWp0a2docHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDgzNjksImV4cCI6MjEwMzIyNDM2OX0.5Fr7mOWEjDG0uz8VNbtWiof50IJnkCYjTe9BI2Ptkdw';
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+const APP_VERSION = 'v7 · 2026-09-30';
+
+
+/* ============ NGÔN NGỮ / 言語 ============ */
+const I18N = {
+ vi:{
+  appTitle:'Hiện trạng phòng', login:'Đăng nhập', logout:'Đăng xuất',
+  tabHome:'Tổng quan', tabRooms:'Phòng', tabTasks:'Việc cần làm', tabSetup:'Cài đặt',
+  email:'Email', password:'Mật khẩu', loginHint:'Quên mật khẩu thì báo quản lý đặt lại.',
+  needBoth:'Nhập đủ email và mật khẩu', badLogin:'Sai email hoặc mật khẩu',
+  needCheck:'Cần kiểm tra', ofRooms:'/ {0} phòng',
+  overdue:'Quá hạn chu kỳ hoặc chưa từng kiểm tra', allInCycle:'Toàn bộ phòng đang trong chu kỳ',
+  openTasks:'Việc cần xử lý', roomsOk:'Phòng đạt yêu cầu', buildings:'Toà nhà',
+  seeDue:'Xem {0} phòng cần kiểm tra', roomsCount:'{0} phòng', dueCount:'{0} cần kiểm tra',
+  noRooms:'Chưa có phòng nào', noRoomsHint:'Chạy script cài đặt trong Supabase để nạp danh sách phòng.',
+  search:'Tìm số phòng hoặc toà nhà', fAll:'Tất cả', fDue:'Cần kiểm tra', fIssue:'Có việc',
+  allBuildings:'Mọi toà', noMatch:'Không có phòng phù hợp', noMatchHint:'Thử bỏ bớt bộ lọc.',
+  neverChecked:'Chưa từng kiểm tra', checkedOn:'Kiểm tra {0}', tasksN:'{0} việc',
+  due:'Đến hạn', inCycle:'Trong hạn', back:'Quay lại',
+  lastCheck:'KIỂM TRA GẦN NHẤT', cycle:'CHU KỲ', days:'{0} ngày', none:'Chưa có',
+  openTasksN:'{0} việc cần xử lý', noOpen:'Không có việc tồn', noData:'Chưa có dữ liệu',
+  roomOk:'Phòng đạt yêu cầu ở lần kiểm tra gần nhất.', runCheck:'Hãy chạy một lượt kiểm tra.',
+  viewHistory:'Xem lịch sử kiểm tra', startCheck:'Bắt đầu kiểm tra phòng {0}',
+  markDone:'Đã xong', doneOk:'Đã đánh dấu hoàn tất', loggedOn:'Ghi nhận {0}',
+  photosN:'{0} ảnh đính kèm', delPhoto:'Xoá ảnh này?', photoAdded:'Đã thêm {0} ảnh',
+  photoDeleted:'Đã xoá ảnh', processing:'Đang xử lý ảnh…',
+  history:'Lịch sử {0}', loading:'Đang tải…', noHistory:'Chưa có lượt kiểm tra nào',
+  noHistoryHint:'Lịch sử sẽ hiện ở đây sau lượt đầu tiên.', noIssue:'Không phát hiện vấn đề.',
+  itemsN:'{0} mục', doneTag:'Đã xong',
+  checking:'Kiểm tra {0}', cancel:'Huỷ',
+  cancelAsk:'Huỷ lượt kiểm tra này? Dữ liệu chưa lưu sẽ mất.',
+  inspector:'Người kiểm tra:', noteHint:'Ghi chú (vd: vết ố góc tường, thiếu 2 khăn)',
+  saveResult:'Lưu kết quả ({0}/{1} mục)', pickOne:'Chọn ít nhất 1 mục để lưu',
+  savedIssues:'Đã lưu · {0} việc cần xử lý', savedOk:'Đã lưu · phòng đạt yêu cầu',
+  noTasks:'Không còn việc tồn', noTasksHint:'Mọi phòng đã kiểm tra đều đạt yêu cầu.',
+  account:'Tài khoản', roleAdmin:'Quản lý', roleStaff:'Nhân viên',
+  displayName:'Tên hiển thị khi kiểm tra', nameChanged:'Đã đổi tên hiển thị',
+  facility:'Cơ sở', manageRooms:'Quản lý toà nhà &amp; phòng',
+  buildingsN:'{0} toà nhà', itemsCount:'{0} hạng mục kiểm tra', areasN:'{0} khu vực',
+  adminOnly:'Chỉ quản lý mới sửa được danh sách phòng.',
+  cycleTitle:'Chu kỳ kiểm tra', cycleAll:'Đặt chu kỳ cho toàn bộ phòng (ngày)',
+  applyAll:'Áp dụng cho tất cả', cycleAsk:'Đặt chu kỳ {0} ngày cho toàn bộ {1} phòng?',
+  cycleDone:'Đã cập nhật chu kỳ', logoutAsk:'Đăng xuất khỏi thiết bị này?',
+  footer:'Ảnh tự xoá sau 3 tháng. Trên iPhone: Safari → Chia sẻ → Thêm vào MH chính.',
+  language:'Ngôn ngữ', forceReload:'Tải lại bản mới nhất',
+  adminTitle:'Toà nhà & phòng', addBuilding:'Thêm toà nhà mới', buildingName:'Tên toà nhà',
+  roomList:'Danh sách phòng', rangeHint:'Gạch ngang cho dải liên tục, dấu phẩy để ngăn cách.',
+  addBuildingBtn:'Thêm toà nhà', rename:'Đổi tên', del:'Xoá',
+  addRooms:'＋ Thêm phòng vào toà này', delWarn:'Xoá phòng sẽ xoá cả lịch sử kiểm tra và ảnh của phòng đó.',
+  needName:'Nhập tên toà nhà', needRooms:'Nhập ít nhất một phòng, vd: 101-110',
+  roomsAdded:'Đã thêm {0} phòng', askRooms:'Danh sách phòng cần thêm (vd: 401-408):',
+  askBuildingName:'Tên toà nhà:', delBuildingAsk:'Xoá toà nhà này cùng {0} phòng, toàn bộ lịch sử kiểm tra và ảnh? Không khôi phục được.',
+  buildingDeleted:'Đã xoá toà nhà', askRoomName:'Số / tên phòng (để trống rồi OK để xoá phòng):',
+  askCycle:'Chu kỳ kiểm tra (ngày):', delRoomAsk:'Xoá phòng {0} cùng lịch sử và ảnh?',
+  errLoad:'Lỗi tải dữ liệu: ', err:'Lỗi: ', errSave:'Không lưu được: ',
+  errSavePhoto:'Không lưu được ảnh: ', errDel:'Không xoá được: ', errIssue:'Lưu vấn đề thất bại: ',
+  today:'hôm nay', yesterday:'hôm qua', daysAgo:'{0} ngày trước',
+  commonArea:'Khu vực chung', commonShort:'Chung',
+  commonDue:'Khu vực chung cần KT', commonOk:'Khu vực chung đạt',
+  navHome:'Tổng quan', navRooms:'Phòng', navTasks:'Việc', navStock:'Kho', navSetup:'Cài đặt',
+  stock:'Kho đồ dùng', warehouses:'Kho chính', cabinets:'Tủ tại toà nhà',
+  save:'Lưu', addItemTitle:'Thêm mặt hàng vào {0}',
+  fName:'Tên mặt hàng', fUnit:'Đơn vị', fQty:'Số lượng', fMin:'Ngưỡng cảnh báo sắp hết',
+  minHintLoc:'Để trống = dùng ngưỡng chung ({0}). Nhập 0 = không cảnh báo.',
+  minHintG:'0 = không cảnh báo.',
+  fromCatalog:'Có sẵn trong danh mục — bấm để điền nhanh',
+  removeHere:'Xoá khỏi nơi này', removeAsk:'Xoá {0} khỏi nơi này? Số lượng ở nơi khác không đổi.',
+  removed:'Đã xoá khỏi nơi này', nameNeeded:'Nhập tên mặt hàng',
+  adminOnlyNew:'Chỉ quản lý mới tạo được mặt hàng mới trong danh mục',
+  globalMin:'ngưỡng chung {0}', ownMin:'ngưỡng riêng {0}',
+  delFromCatalog:'Xoá khỏi danh mục',
+  itemsHere:'{0} mặt hàng', lowN:'{0} sắp hết', lowStock:'Sắp hết', outStock:'Hết hàng',
+  noStock:'Chưa có mặt hàng nào ở đây', noStockHint:'Bấm nút bên dưới để thêm.',
+  addStockItem:'＋ Thêm mặt hàng vào nơi này', pickItem:'Chọn mặt hàng:',
+  setQty:'Số lượng ({0}):', qtySaved:'Đã cập nhật số lượng',
+  manageItems:'Danh mục mặt hàng', manageItemsHint:'Mặt hàng dùng chung cho mọi kho và tủ.',
+  newItem:'＋ Thêm mặt hàng mới', askItemName:'Tên mặt hàng:', askUnit:'Đơn vị (cái, chai, bịch, cuộn…):',
+  askMin:'Ngưỡng cảnh báo sắp hết (0 = không cảnh báo):', itemSaved:'Đã lưu mặt hàng',
+  delItemAsk:'Xoá mặt hàng {0} khỏi danh mục? Số lượng ở mọi kho cũng mất.',
+  unitOf:'Đơn vị: {0}', minOf:'Ngưỡng: {0}', stockHistory:'Lịch sử xuất nhập',
+  noHist:'Chưa có thay đổi nào', errTable:'Thiếu bảng dữ liệu — hãy chạy file SQL bước 4 trong Supabase.',
+  seeDueCommon:'Xem {0} khu vực chung cần kiểm tra',
+  scope:'Loại', scRoom:'Phòng', scCommon:'Khu vực chung', scAll:'Cả hai',
+  commonCount:'{0} khu vực chung', commonDueN:'{0} cần kiểm tra',
+  editItems:'Điều chỉnh hạng mục kiểm tra', itemsFor:'Hạng mục · {0}',
+  itemsHint:'Tắt hạng mục không có ở phòng này. Thay đổi chỉ áp dụng cho phòng này.',
+  addItem:'＋ Thêm hạng mục riêng cho phòng này', askArea:'Thuộc khu vực nào?',
+  askItem:'Tên hạng mục mới:', itemAdded:'Đã thêm hạng mục', itemOff:'Đã tắt hạng mục',
+  itemOn:'Đã bật lại hạng mục', onlyThisRoom:'riêng phòng này', onlyThisBuilding:'riêng toà này',
+  takePhoto:'Chụp ảnh', fromLibrary:'Chọn từ thư viện', activeItems:'{0}/{1} hạng mục đang bật',
+  st_ok:'Tốt', st_clean:'Vệ sinh kỹ', st_refill:'Bổ sung', st_replace:'Thay thế', st_broken:'Hư hỏng',
+  ss_ok:'Tốt', ss_clean:'VS kỹ', ss_refill:'Bổ sung', ss_replace:'Thay', ss_broken:'Hỏng'
+ },
+ ja:{
+  appTitle:'客室コンディション', login:'ログイン', logout:'ログアウト',
+  tabHome:'ダッシュボード', tabRooms:'客室', tabTasks:'タスク', tabSetup:'設定',
+  email:'メールアドレス', password:'パスワード', loginHint:'パスワードを忘れた場合は管理者に再設定を依頼してください。',
+  needBoth:'メールとパスワードを入力してください', badLogin:'メールまたはパスワードが違います',
+  needCheck:'点検が必要', ofRooms:'/ {0}室',
+  overdue:'点検周期を過ぎている、または未点検', allInCycle:'すべての客室が周期内です',
+  openTasks:'未対応タスク', roomsOk:'良好な客室', buildings:'建物',
+  seeDue:'点検が必要な{0}室を見る', roomsCount:'{0}室', dueCount:'{0}室が点検必要',
+  noRooms:'客室が登録されていません', noRoomsHint:'Supabaseでセットアップスクリプトを実行してください。',
+  search:'部屋番号または建物名で検索', fAll:'すべて', fDue:'点検が必要', fIssue:'タスクあり',
+  allBuildings:'全建物', noMatch:'該当する客室がありません', noMatchHint:'絞り込みを解除してください。',
+  neverChecked:'未点検', checkedOn:'点検 {0}', tasksN:'タスク{0}件',
+  due:'期限', inCycle:'周期内', back:'戻る',
+  lastCheck:'最終点検', cycle:'点検周期', days:'{0}日', none:'なし',
+  openTasksN:'未対応タスク {0}件', noOpen:'未対応タスクなし', noData:'データなし',
+  roomOk:'前回の点検で問題はありませんでした。', runCheck:'点検を実施してください。',
+  viewHistory:'点検履歴を見る', startCheck:'{0}号室の点検を開始',
+  markDone:'完了', doneOk:'完了にしました', loggedOn:'記録 {0}',
+  photosN:'写真{0}枚', delPhoto:'この写真を削除しますか？', photoAdded:'写真{0}枚を追加しました',
+  photoDeleted:'写真を削除しました', processing:'写真を処理中…',
+  history:'{0}号室の履歴', loading:'読み込み中…', noHistory:'点検履歴がありません',
+  noHistoryHint:'初回の点検後にここに表示されます。', noIssue:'問題は見つかりませんでした。',
+  itemsN:'{0}項目', doneTag:'完了',
+  checking:'{0}号室の点検', cancel:'中止',
+  cancelAsk:'この点検を中止しますか？保存していないデータは失われます。',
+  inspector:'点検者:', noteHint:'メモ（例：壁の角にシミ、タオル2枚不足）',
+  saveResult:'結果を保存（{0}/{1}項目）', pickOne:'1項目以上選択してください',
+  savedIssues:'保存しました · 未対応タスク{0}件', savedOk:'保存しました · 問題なし',
+  noTasks:'未対応タスクなし', noTasksHint:'点検済みの客室はすべて良好です。',
+  account:'アカウント', roleAdmin:'管理者', roleStaff:'スタッフ',
+  displayName:'点検時に表示される名前', nameChanged:'表示名を変更しました',
+  facility:'施設', manageRooms:'建物・客室の管理',
+  buildingsN:'{0}棟', itemsCount:'点検項目{0}件', areasN:'{0}エリア',
+  adminOnly:'客室リストの編集は管理者のみ可能です。',
+  cycleTitle:'点検周期', cycleAll:'全客室の点検周期（日）',
+  applyAll:'すべてに適用', cycleAsk:'全{1}室の点検周期を{0}日に設定しますか？',
+  cycleDone:'点検周期を更新しました', logoutAsk:'この端末からログアウトしますか？',
+  footer:'写真は3か月後に自動削除されます。iPhone: Safari → 共有 → ホーム画面に追加。',
+  language:'言語', forceReload:'最新版を再読み込み',
+  adminTitle:'建物・客室', addBuilding:'建物を追加', buildingName:'建物名',
+  roomList:'客室リスト', rangeHint:'連続する番号はハイフン、区切りはカンマを使用します。',
+  addBuildingBtn:'建物を追加', rename:'名前変更', del:'削除',
+  addRooms:'＋ この建物に客室を追加', delWarn:'客室を削除すると点検履歴と写真もすべて削除されます。',
+  needName:'建物名を入力してください', needRooms:'客室を1つ以上入力してください（例：101-110）',
+  roomsAdded:'{0}室を追加しました', askRooms:'追加する客室（例：401-408）:',
+  askBuildingName:'建物名:', delBuildingAsk:'この建物と{0}室、点検履歴と写真をすべて削除しますか？元に戻せません。',
+  buildingDeleted:'建物を削除しました', askRoomName:'部屋番号（空欄でOKすると削除）:',
+  askCycle:'点検周期（日）:', delRoomAsk:'{0}号室を履歴・写真ごと削除しますか？',
+  errLoad:'読み込みエラー: ', err:'エラー: ', errSave:'保存できませんでした: ',
+  errSavePhoto:'写真を保存できませんでした: ', errDel:'削除できませんでした: ', errIssue:'記録の保存に失敗しました: ',
+  today:'今日', yesterday:'昨日', daysAgo:'{0}日前',
+  commonArea:'共用部', commonShort:'共用',
+  commonDue:'共用部の点検', commonOk:'共用部 良好',
+  navHome:'概要', navRooms:'客室', navTasks:'タスク', navStock:'在庫', navSetup:'設定',
+  stock:'備品在庫', warehouses:'倉庫', cabinets:'建物の備品棚',
+  save:'保存', addItemTitle:'{0}に品目を追加',
+  fName:'品目名', fUnit:'単位', fQty:'数量', fMin:'残少アラートのしきい値',
+  minHintLoc:'空欄＝共通しきい値（{0}）を使用。0＝アラートなし。',
+  minHintG:'0＝アラートなし。',
+  fromCatalog:'マスタにある品目 — タップで入力',
+  removeHere:'この場所から削除', removeAsk:'この場所から「{0}」を削除しますか？他の場所の数量は変わりません。',
+  removed:'削除しました', nameNeeded:'品目名を入力してください',
+  adminOnlyNew:'新しい品目の作成は管理者のみです',
+  globalMin:'共通しきい値 {0}', ownMin:'個別しきい値 {0}',
+  delFromCatalog:'マスタから削除',
+  itemsHere:'{0}品目', lowN:'{0}品目が残少', lowStock:'残少', outStock:'在庫切れ',
+  noStock:'ここには品目がありません', noStockHint:'下のボタンから追加してください。',
+  addStockItem:'＋ この場所に品目を追加', pickItem:'品目を選択:',
+  setQty:'数量（{0}）:', qtySaved:'数量を更新しました',
+  manageItems:'品目マスタ', manageItemsHint:'すべての倉庫・棚で共通の品目です。',
+  newItem:'＋ 品目を追加', askItemName:'品目名:', askUnit:'単位（本、箱、袋、ロールなど）:',
+  askMin:'残少アラートのしきい値（0＝なし）:', itemSaved:'品目を保存しました',
+  delItemAsk:'品目「{0}」をマスタから削除しますか？全倉庫の数量も失われます。',
+  unitOf:'単位: {0}', minOf:'しきい値: {0}', stockHistory:'入出庫履歴',
+  noHist:'変更履歴はありません', errTable:'テーブルがありません — SupabaseでSQL手順4を実行してください。',
+  seeDueCommon:'点検が必要な共用部{0}件を見る',
+  scope:'種別', scRoom:'客室', scCommon:'共用部', scAll:'すべて',
+  commonCount:'共用部{0}件', commonDueN:'{0}件が点検必要',
+  editItems:'点検項目を調整', itemsFor:'点検項目 · {0}',
+  itemsHint:'この客室に無い項目はオフにしてください。変更はこの客室のみに適用されます。',
+  addItem:'＋ この客室だけの項目を追加', askArea:'どのエリアに追加しますか？',
+  askItem:'新しい項目名:', itemAdded:'項目を追加しました', itemOff:'項目をオフにしました',
+  itemOn:'項目をオンにしました', onlyThisRoom:'この客室のみ', onlyThisBuilding:'この建物のみ',
+  takePhoto:'写真を撮る', fromLibrary:'ライブラリから選択', activeItems:'{0}/{1}項目が有効',
+  st_ok:'良好', st_clean:'要清掃', st_refill:'要補充', st_replace:'要交換', st_broken:'故障',
+  ss_ok:'良好', ss_clean:'要清掃', ss_refill:'要補充', ss_replace:'要交換', ss_broken:'故障'
+ }
+};
+let lang = localStorage.getItem('ra_lang');
+if(lang !== 'vi' && lang !== 'ja') lang = (navigator.language||'').startsWith('ja') ? 'ja' : 'vi';
+function t(k, ...a){
+  let s = I18N[lang][k] ?? I18N.vi[k] ?? k;
+  a.forEach((v,i) => { s = s.split('{'+i+'}').join(v) });
+  return s;
+}
+const sl = k => t('st_'+k);
+const ss = k => t('ss_'+k);
+function setLang(v){ lang = v; localStorage.setItem('ra_lang', v); document.documentElement.lang = v; render() }
+// tên khu vực / hạng mục theo ngôn ngữ
+const AJ = new Map(), IJ = new Map();
+const areaName = a => (lang==='ja' && AJ.get(a)) || a;
+const rname = r => r && r.is_common ? t('commonArea') : (r ? r.name : '');
+const itemName = i => (lang==='ja' && IJ.get(i)) || i;
+
+const STATUS = { ok:{c:'ok'}, clean:{c:'clean'}, refill:{c:'refill'},
+                 replace:{c:'replace'}, broken:{c:'broken'} };
+const ORDER = ['ok','clean','refill','replace','broken'];
+const RANK  = {1:'broken',2:'replace',3:'refill',4:'clean'};
+
+/* ============ TRẠNG THÁI ============ */
+let me = null;            // {id, email, name}
+let rooms = [];           // room_overview
+let checklist = [];       // [{area, items:[{id,item}]}]
+let allItems = [];
+let stLocs = [], stItems = [], stLv = new Map();
+let exSet = new Set();
+let openIssues = [];      // issues chưa đóng
+let draft = null;
+let nav = {v:'home'};
+const signed = new Map(); // path -> url
+
+/* ============ TIỆN ÍCH ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2200)}
+function busy(on){$('#busy').classList.toggle('on',!!on)}
+function dstr(v){ if(!v) return '';
+  const d=new Date(v), n=new Date();
+  const dd=Math.floor((new Date(n.getFullYear(),n.getMonth(),n.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+  if(dd===0)return t('today'); if(dd===1)return t('yesterday'); if(dd<30)return t('daysAgo',dd);
+  return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}` }
+function daysSince(v){ return v ? Math.floor((Date.now()-new Date(v))/864e5) : null }
+const isDue = r => !r.last_at || daysSince(r.last_at) >= r.cycle_days;
+const issuesOf = r => openIssues.filter(x => x.room_id === r.id);
+function bindAll(sel, fn){ document.querySelectorAll(sel).forEach(b => b.onclick = () => fn(b)) }
+function lightbox(src){ $('#lbimg').src = src; $('#lb').style.display='flex' }
+$('#lb').onclick = () => { $('#lb').style.display='none'; $('#lbimg').src='' };
+
+function compress(file, max=1000, q=0.55){ return new Promise(res=>{
+  const fr=new FileReader();
+  fr.onload=()=>{ const im=new Image();
+    im.onload=()=>{ let{width:w,height:h}=im; const sc=Math.min(1,max/Math.max(w,h));
+      w=Math.round(w*sc); h=Math.round(h*sc);
+      const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+      cv.getContext('2d').drawImage(im,0,0,w,h);
+      cv.toBlob(b=>res(b),'image/jpeg',q) };
+    im.onerror=()=>res(null); im.src=fr.result };
+  fr.onerror=()=>res(null); fr.readAsDataURL(file) })}
+
+function pickPhotos(cb, camera){
+  const p = camera ? $('#pickerCam') : $('#picker'); p.value='';
+  p.onchange = async () => {
+    const fs=[...p.files]; if(!fs.length) return;
+    toast(t('processing'));
+    const out=[];
+    for(const f of fs){ const b=await compress(f); if(b) out.push({blob:b, url:URL.createObjectURL(b)}) }
+    cb(out);
+  };
+  p.click();
+}
+
+async function signUrls(paths){
+  const need = paths.filter(p => !signed.has(p));
+  if(need.length){
+    const {data} = await sb.storage.from('photos').createSignedUrls(need, 3600);
+    (data||[]).forEach(d => { if(d.signedUrl) signed.set(d.path, d.signedUrl) });
+  }
+  return paths.map(p => signed.get(p)).filter(Boolean);
+}
+
+/* ============ NẠP DỮ LIỆU ============ */
+async function loadAll(){
+  busy(true);
+  const [ro, ci, ii, ex, sl, si, lv] = await Promise.all([
+    sb.from('room_overview').select('*').order('building_sort').order('sort'),
+    sb.from('checklist').select('*').order('area_sort').order('item_sort'),
+    sb.from('issues').select('*').is('resolved_at', null).order('created_at', {ascending:false}),
+    sb.from('checklist_exclusions').select('*'),
+    sb.from('stock_locations').select('*').order('kind').order('sort'),
+    sb.from('stock_items').select('*').eq('active', true).order('sort'),
+    sb.from('stock_levels').select('*')
+  ]);
+  busy(false);
+  const err = ro.error || ci.error || ii.error;
+  if(err){ toast(t('errLoad') + err.message); return false }
+  rooms = ro.data || [];
+  openIssues = ii.data || [];
+  const map = new Map();
+  AJ.clear(); IJ.clear();
+  (ci.data||[]).forEach(r => {
+    if(r.area_ja) AJ.set(r.area, r.area_ja);
+    if(r.item_ja) IJ.set(r.item, r.item_ja);
+    if(!map.has(r.area)) map.set(r.area, []); map.get(r.area).push(r) });
+  allItems = ci.data || [];
+  if(ex.error || sl.error) toast(t('errTable'));
+  exSet = new Set((ex.data||[]).map(e => e.room_id + '|' + e.checklist_id));
+  stLocs  = sl.data || [];
+  stItems = si.data || [];
+  stLv = new Map((lv.data||[]).map(r => [r.location_id + '|' + r.item_id, r]));
+  checklist = group(allItems.filter(r => !r.common_only && !r.scope_room_id && !r.scope_building_id));
+  return true;
+}
+
+function group(items){
+  const m = new Map();
+  items.forEach(r => { if(!m.has(r.area)) m.set(r.area, []); m.get(r.area).push(r) });
+  return [...m].map(([area, items]) => ({area, items}));
+}
+// Hạng mục áp dụng cho một phòng: chung + riêng toà + riêng phòng, trừ mục đã tắt
+function itemsFor(room, includeOff){
+  return allItems.filter(r => {
+    if(!!r.common_only !== !!room.is_common) return false;
+    if(!includeOff && exSet.has(room.id + '|' + r.id)) return false;
+    if(r.scope_room_id) return r.scope_room_id === room.id;
+    if(r.scope_building_id) return r.scope_building_id === room.building_id;
+    return true;
+  });
+}
+const checklistFor = room => group(itemsFor(room));
+
+/* ============ ĐIỀU HƯỚNG ============ */
+const tabs = () => [['home','▦',t('navHome')],['rooms','▤',t('navRooms')],['stock','▥',t('navStock')],['tasks','◈',t('navTasks')],['setup','⚙',t('navSetup')]];
+function go(v, p={}){ nav={v, ...p}; window.scrollTo(0,0); render() }
+function head(t, backLabel, backFn){
+  $('#ttl').textContent = t;
+  if(backLabel){ $('#topact').innerHTML = `<button class="back" id="bk">‹ ${esc(backLabel)}</button>`; $('#bk').onclick = backFn }
+  else $('#topact').innerHTML = '';
+}
+function addSticky(label, fn, disabled, noBar){
+  const d=document.createElement('div');
+  d.className='sticky' + (noBar?' nobar':'');
+  d.innerHTML=`<button class="btn"${disabled?' disabled':''}>${esc(label)}</button>`;
+  d.querySelector('button').onclick=()=>{ if(!disabled) fn() };
+  document.body.appendChild(d);
+}
+function render(){
+  document.querySelectorAll('.sticky').forEach(e=>e.remove());
+  const views={login:vLogin, home:vHome, rooms:vRooms, room:vRoom, inspect:vInspect,
+               tasks:vTasks, setup:vSetup, history:vHistory, admin:vAdmin, items:vItems,
+               stock:vStock, stockLoc:vStockLoc, stockItems:vStockItems};
+  (views[nav.v]||vHome)();
+  const hide = (nav.v==='login');
+  $('#tabs').classList.toggle('hide', hide);
+  $('#tabs').innerHTML = hide ? '' : tabs().map(([k,ic,l]) =>
+    `<button class="t ${nav.v===k?'on':''}" data-tab="${k}"><b>${ic}</b>${l}</button>`).join('');
+  bindAll('[data-tab]', b => go(b.dataset.tab));
+}
+
+/* ============ ĐĂNG NHẬP ============ */
+function vLogin(){
+  head(t('login'));
+  $('#view').innerHTML = `
+  <div class="card" style="margin-top:8vh">
+    <div class="eyebrow">Tokyo T&amp;S · ${t('appTitle')}</div>
+    <label class="f"><span>${t('email')}</span><input type="email" id="em" autocomplete="username" placeholder="ten@cyc.co.jp"></label>
+    <label class="f"><span>${t('password')}</span><input type="password" id="pw" autocomplete="current-password"></label>
+    <button class="btn" id="go">${t('login')}</button>
+    <p class="muted" style="margin:12px 0 0;text-align:center;font-size:12.5px">
+      ${t('loginHint')}</p>
+    <div class="pillrow" style="justify-content:center;margin-top:10px">
+      <button class="pill ${lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button>
+      <button class="pill ${lang==='ja'?'on':''}" data-lang="ja">日本語</button></div>
+  </div>`;
+  const submit = async () => {
+    const email=$('#em').value.trim(), password=$('#pw').value;
+    if(!email || !password) return toast(t('needBoth'));
+    busy(true);
+    const {error} = await sb.auth.signInWithPassword({email, password});
+    busy(false);
+    if(error) return toast(error.message.includes('Invalid') ? t('badLogin') : error.message);
+    await boot();
+  };
+  bindAll('[data-lang]', b => setLang(b.dataset.lang));
+  $('#go').onclick = submit;
+  $('#pw').onkeydown = e => { if(e.key==='Enter') submit() };
+}
+
+/* ============ TỔNG QUAN ============ */
+function vHome(){
+  head(t('appTitle'));
+  if(!rooms.length){
+    $('#view').innerHTML = `<div class="card"><div class="empty"><b>${t('noRooms')}</b>${t('noRoomsHint')}</div></div>`;
+    return;
+  }
+  const onlyRooms  = rooms.filter(r => !r.is_common);
+  const onlyCommon = rooms.filter(r =>  r.is_common);
+  const due        = onlyRooms.filter(isDue);
+  const dueCommon  = onlyCommon.filter(isDue);
+  const clean = onlyRooms.filter(r => r.last_at && !isDue(r) && !r.open_count).length;
+  const byB = new Map();
+  rooms.forEach(r => { if(!byB.has(r.building_id)) byB.set(r.building_id, []); byB.get(r.building_id).push(r) });
+
+  $('#view').innerHTML = `
+  <div class="hero">
+    <div class="k">${t('needCheck')}</div>
+    <div class="big">${due.length}<i> ${t('ofRooms', onlyRooms.length)}</i></div>
+    <div class="sub">${due.length ? t('overdue') : t('allInCycle')}</div>
+    <div class="split">
+      <div><div class="n" style="color:#F2C230">${openIssues.length}</div><div class="l">${t('openTasks')}</div></div>
+      <div><div class="n" style="color:#7FD1A4">${clean}</div><div class="l">${t('roomsOk')}</div></div>
+      <div><div class="n">${dueCommon.length}<span style="font-size:14px;color:#9AA6AE">/${onlyCommon.length}</span></div><div class="l">${t('commonDue')}</div></div>
+    </div>
+  </div>
+  ${due.length ? `<button class="btn" id="gd" style="margin-bottom:10px">${t('seeDue', due.length)}</button>` : ''}
+  ${dueCommon.length ? `<button class="btn ghost" id="gc" style="margin-bottom:14px">${t('seeDueCommon', dueCommon.length)}</button>` : ''}
+  ${[...byB.values()].map(rs => {
+    const rr = rs.filter(x => !x.is_common), rc = rs.filter(x => x.is_common);
+    const d = rr.filter(isDue).length, dc = rc.filter(isDue).length;
+    return `<div class="card">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:11px">
+        <h2 style="font-size:16px;flex:1">${esc(rs[0].building_name)}</h2>
+        <span class="muted" style="font-size:12px">${t('roomsCount', rr.length)}${d?` · ${t('dueCount', d)}`:''}${rc.length?` · ${t('commonCount', rc.length)}${dc?` (${t('commonDueN', dc)})`:''}`:''}</span>
+      </div>
+      <div class="rack">${rs.map(keyTile).join('')}</div></div>`;
+  }).join('')}`;
+  if(due.length) $('#gd').onclick = () => go('rooms', {f:'due', sc:'room'});
+  if(dueCommon.length) $('#gc').onclick = () => go('rooms', {f:'due', sc:'common'});
+  bindKeys();
+}
+function keyTile(r){
+  const w = r.worst_rank ? RANK[r.worst_rank] : null;
+  const cls = w ? 'st-'+STATUS[w].c : (r.last_at ? 'st-ok' : 'st-none');
+  return `<button class="key ${cls}${isDue(r)?' due':''}" data-room="${r.id}">
+    ${r.open_count ? `<span class="cnt">${r.open_count}</span>` : ''}
+    <div class="no">${esc(r.is_common ? t('commonShort') : r.name)}</div>
+    <div class="mt">${r.last_at ? dstr(r.last_at) : t('neverChecked')}</div></button>`;
+}
+function bindKeys(){ bindAll('[data-room]', b => go('room', {id:b.dataset.room})) }
+
+/* ============ DANH SÁCH PHÒNG ============ */
+function vRooms(){
+  head(t('tabRooms'));
+  const f = nav.f || 'all', q = (nav.q||'').toLowerCase().trim();
+  const sc = nav.sc || 'room';
+  let rs = rooms;
+  if(sc === 'room')   rs = rs.filter(r => !r.is_common);
+  if(sc === 'common') rs = rs.filter(r =>  r.is_common);
+  if(nav.b) rs = rs.filter(r => r.building_id === nav.b);
+  if(f==='due') rs = rs.filter(isDue);
+  if(f==='issue') rs = rs.filter(r => r.open_count > 0);
+  if(q) rs = rs.filter(r => (r.name+' '+r.building_name).toLowerCase().includes(q));
+  const bs = [...new Map(rooms.map(r => [r.building_id, r.building_name])).entries()];
+
+  $('#view').innerHTML = `
+  <input type="text" id="q" placeholder="${t('search')}" value="${esc(nav.q||'')}" style="margin-bottom:10px">
+  <div class="pillrow" style="margin-bottom:6px">
+    ${[['room',t('scRoom')],['common',t('scCommon')],['all',t('scAll')]].map(([k,l])=>
+      `<button class="pill ${sc===k?'on':''}" data-sc="${k}">${l}</button>`).join('')}
+  </div>
+  <div class="pillrow" style="margin-bottom:6px">
+    ${[['all',t('fAll')],['due',t('fDue')],['issue',t('fIssue')]].map(([k,l])=>
+      `<button class="pill ${f===k?'on':''}" data-f="${k}">${l}</button>`).join('')}
+  </div>
+  <div class="pillrow" style="margin-bottom:12px">
+    <button class="pill ${!nav.b?'on':''}" data-b="">${t('allBuildings')}</button>
+    ${bs.map(([id,n]) => `<button class="pill ${nav.b===id?'on':''}" data-b="${id}">${esc(n)}</button>`).join('')}
+  </div>
+  ${rs.length ? `<div class="card" style="padding:0 14px">${rs.map(r => {
+    const w = r.worst_rank ? RANK[r.worst_rank] : null;
+    return `<button class="row ${w?'st-'+STATUS[w].c:(r.last_at?'st-ok':'st-none')}" data-room="${r.id}">
+      <span class="dot"></span><span class="main">
+      <span class="t1">${esc(rname(r))} · ${esc(r.building_name)}</span>
+      <span class="t2">${r.last_at ? `${t('checkedOn', dstr(r.last_at))}${r.last_by?' · '+esc(r.last_by):''}` : t('neverChecked')}${r.open_count?` · ${t('tasksN', r.open_count)}`:''}</span>
+      </span>${isDue(r)?`<span class="tag st-clean">${t('due')}</span>`:''}<span class="chev">›</span></button>`;
+  }).join('')}</div>` : `<div class="card"><div class="empty"><b>${t('noMatch')}</b>${t('noMatchHint')}</div></div>`}`;
+  bindKeys();
+  bindAll('[data-f]',  b => go('rooms', {f:b.dataset.f,  b:nav.b, q:nav.q, sc}));
+  bindAll('[data-sc]', b => go('rooms', {f:nav.f, b:nav.b, q:nav.q, sc:b.dataset.sc}));
+  bindAll('[data-b]',  b => go('rooms', {f:nav.f, b:b.dataset.b||null, q:nav.q, sc}));
+  const qi=$('#q');
+  qi.oninput = () => { nav.q=qi.value; clearTimeout(qi._t);
+    qi._t=setTimeout(()=>{ const p=qi.selectionStart; render(); const n=$('#q'); if(n){n.focus(); n.setSelectionRange(p,p)} },280) };
+}
+
+/* ============ CHI TIẾT PHÒNG ============ */
+function vRoom(){
+  const r = rooms.find(x => x.id === nav.id);
+  if(!r) return go('rooms');
+  head(rname(r), t('back'), () => go('rooms'));
+  const iss = issuesOf(r);
+  $('#view').innerHTML = `
+  <div class="card">
+    <div class="eyebrow">${esc(r.building_name)}</div>
+    <div style="display:flex;gap:20px">
+      <div><div class="muted" style="font-size:11.5px;font-weight:700">${t('lastCheck')}</div>
+        <div style="font-size:17px;font-weight:650">${r.last_at?dstr(r.last_at):t('none')}</div>
+        ${r.last_by?`<div class="muted">${esc(r.last_by)}</div>`:''}</div>
+      <div><div class="muted" style="font-size:11.5px;font-weight:700">${t('cycle')}</div>
+        <div style="font-size:17px;font-weight:650">${t('days', r.cycle_days)}</div>
+        ${isDue(r)?`<span class="tag st-clean">${t('due')}</span>`:`<span class="tag st-ok">${t('inCycle')}</span>`}</div>
+    </div>
+  </div>
+  ${iss.length ? `<div class="card"><div class="eyebrow">${t('openTasksN', iss.length)}</div>
+    ${iss.map(x => issueRow(x, true)).join('')}</div>`
+   : `<div class="card"><div class="empty" style="padding:22px"><b>${r.last_at?t('noOpen'):t('noData')}</b>
+      ${r.last_at?t('roomOk'):t('runCheck')}</div></div>`}
+  <button class="btn ghost" id="hist" style="margin-bottom:8px">${t('viewHistory')}</button>
+  ${me.admin ? `<button class="btn ghost" id="cfg">${t('editItems')}</button>` : ''}`;
+  $('#hist').onclick = () => go('history', {id:r.id});
+  if(me.admin) $('#cfg').onclick = () => go('items', {id:r.id});
+  addSticky(t('startCheck', rname(r)), () => startInspect(r));
+  bindIssues();
+  paintPhotos();
+}
+function issueRow(x, withPhotos){
+  return `<div class="row st-${STATUS[x.status].c}" style="align-items:flex-start">
+    <span class="dot" style="margin-top:6px"></span>
+    <span class="main">
+      <span class="t1" style="white-space:normal">${esc(itemName(x.item))}</span>
+      <span class="t2" style="white-space:normal">${esc(areaName(x.area))}${x.note?' · '+esc(x.note):''}</span>
+      <span class="t2">${t('loggedOn', dstr(x.created_at))}${x.created_by_name?' · '+esc(x.created_by_name):''}</span>
+      ${withPhotos
+        ? `<span class="thumbs" data-photos="${esc((x.photos||[]).join('|'))}" data-issue="${x.id}"></span>`
+        : (x.photos?.length ? `<span class="t2">${t('photosN', x.photos.length)}</span>` : '')}
+    </span>
+    <span style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex:none">
+      <span class="tag">${ss(x.status)}</span>
+      <button class="pill" data-done="${x.id}" style="font-size:11.5px;padding:4px 9px">${t('markDone')}</button>
+    </span></div>`;
+}
+async function paintPhotos(){
+  for(const el of [...document.querySelectorAll('[data-photos]')]){
+    const paths = el.dataset.photos ? el.dataset.photos.split('|').filter(Boolean) : [];
+    const urls = await signUrls(paths);
+    const editable = !!el.dataset.issue;
+    el.innerHTML = urls.map((u,i) => `<span class="th"><img src="${u}" data-zoom="${u}" alt=""
+        onerror="this.parentNode.style.display='none'">
+      ${editable?`<button class="x" data-rmis="${el.dataset.issue}|${paths[i]}">×</button>`:''}</span>`).join('')
+      + (editable ? `<button class="addph" data-addis="${el.dataset.issue}" title="${t('takePhoto')}">📷</button>`
+                   + `<button class="addph" data-addlib="${el.dataset.issue}" title="${t('fromLibrary')}">🖼</button>` : '');
+  }
+  bindAll('[data-zoom]', i => lightbox(i.dataset.zoom));
+  const uploadTo = async (id, ph) => {
+    const iss = openIssues.find(x => x.id === id);
+    if(!iss) return;
+    busy(true);
+    const added = [];
+    for(let n=0; n<ph.length; n++){
+      const path = `${iss.room_id}/${id}/extra-${Date.now()}-${n}.jpg`;
+      const {error} = await sb.storage.from('photos').upload(path, ph[n].blob, {contentType:'image/jpeg'});
+      if(!error) added.push(path);
+    }
+    const photos = [...(iss.photos||[]), ...added];
+    const {error} = await sb.from('issues').update({photos}).eq('id', id);
+    busy(false);
+    if(error) return toast(t('errSavePhoto') + error.message);
+    iss.photos = photos; toast(t('photoAdded', added.length)); render();
+  };
+  bindAll('[data-addis]',  b => pickPhotos(ph => uploadTo(b.dataset.addis, ph), true));
+  bindAll('[data-addlib]', b => pickPhotos(ph => uploadTo(b.dataset.addlib, ph), false));
+  bindAll('[data-rmis]', async b => {
+    if(!confirm(t('delPhoto'))) return;
+    const [id, path] = b.dataset.rmis.split('|');
+    const iss = openIssues.find(x => x.id === id); if(!iss) return;
+    busy(true);
+    await sb.storage.from('photos').remove([path]);
+    const photos = (iss.photos||[]).filter(p => p !== path);
+    const {error} = await sb.from('issues').update({photos}).eq('id', id);
+    busy(false);
+    if(error) return toast(t('errDel') + error.message);
+    iss.photos = photos; signed.delete(path); toast(t('photoDeleted')); render();
+  });
+}
+function bindIssues(){
+  bindAll('[data-done]', async b => {
+    b.disabled = true; busy(true);
+    const {error} = await sb.from('issues').update({
+      resolved_at: new Date().toISOString(), resolved_by: me.id, resolved_by_name: me.name
+    }).eq('id', b.dataset.done);
+    busy(false);
+    if(error) { b.disabled=false; return toast(t('errSave')+error.message) }
+    openIssues = openIssues.filter(x => x.id !== b.dataset.done);
+    rooms.forEach(x => { x.open_count = issuesOf(x).length;
+      const ws = issuesOf(x).map(i => ({broken:1,replace:2,refill:3,clean:4})[i.status]);
+      x.worst_rank = ws.length ? Math.min(...ws) : null });
+    toast(t('doneOk')); render();
+  });
+}
+
+/* ============ LỊCH SỬ ============ */
+async function vHistory(){
+  const r = rooms.find(x => x.id === nav.id);
+  head(t('history', rname(r)), t('back'), () => go('room', {id:r.id}));
+  $('#view').innerHTML = `<div class="card"><div class="empty">${t('loading')}</div></div>`;
+  busy(true);
+  const [insp, iss] = await Promise.all([
+    sb.from('inspections').select('*').eq('room_id', r.id).order('created_at', {ascending:false}).limit(30),
+    sb.from('issues').select('*').eq('room_id', r.id).order('created_at', {ascending:false}).limit(200)
+  ]);
+  busy(false);
+  const list = insp.data || [], all = iss.data || [];
+  if(!list.length){
+    $('#view').innerHTML = `<div class="card"><div class="empty"><b>${t('noHistory')}</b>${t('noHistoryHint')}</div></div>`;
+    return;
+  }
+  $('#view').innerHTML = list.map(i => {
+    const mine = all.filter(x => x.inspection_id === i.id);
+    return `<div class="card">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+        <h2 style="font-size:15.5px;flex:1">${dstr(i.created_at)}</h2>
+        <span class="muted" style="font-size:12px">${esc(i.inspector_name||'—')} · ${t('itemsN', i.checked_count)}</span></div>
+      ${mine.length ? mine.map(x => `<div class="row st-${STATUS[x.status].c}" style="align-items:flex-start">
+          <span class="dot" style="margin-top:6px"></span>
+          <span class="main"><span class="t1" style="white-space:normal">${esc(itemName(x.item))}</span>
+          <span class="t2" style="white-space:normal">${esc(areaName(x.area))}${x.note?' · '+esc(x.note):''}</span>
+          ${x.photos?.length?`<span class="thumbs" data-photos="${esc(x.photos.join('|'))}"></span>`:''}</span>
+          <span class="tag">${x.resolved_at ? t('doneTag') : ss(x.status)}</span></div>`).join('')
+        : `<div class="muted">${t('noIssue')}</div>`}
+    </div>`;
+  }).join('');
+  paintPhotos();
+}
+
+/* ============ KIỂM TRA ============ */
+function startInspect(r){
+  draft = {room:r, cl:checklistFor(r), res:{}, open:0};
+  go('inspect');
+}
+function vInspect(){
+  if(!draft) return go('home');
+  const r = draft.room;
+  head(t('checking', rname(r)), t('cancel'), () => {
+    if(confirm(t('cancelAsk'))){ draft=null; go('room',{id:r.id}) }});
+  const CL = draft.cl;
+  const total = CL.reduce((a,c) => a + c.items.length, 0);
+  const done = Object.keys(draft.res).length;
+  $('#view').innerHTML = `
+  <div class="card" style="padding:12px 14px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="muted" style="flex:1">${t('inspector')} <b style="color:var(--ink)">${esc(me.name)}</b></span>
+      <span class="muted" style="font-variant-numeric:tabular-nums;font-weight:650">${done}/${total}</span></div>
+    <div style="height:6px;background:var(--line-2);border-radius:3px;overflow:hidden;margin-top:9px">
+      <div style="width:${total?Math.round(done/total*100):0}%;height:100%;background:var(--pine)"></div></div>
+  </div>
+  ${CL.map((c, ci) => {
+    const dn = c.items.filter((_,ii) => draft.res[ci+'-'+ii]).length;
+    const bad = c.items.filter((_,ii) => { const v=draft.res[ci+'-'+ii]; return v && v.st!=='ok' }).length;
+    return `<div class="cat ${dn===c.items.length?'done':''}">
+      <button class="h" data-cat="${ci}">
+        <span class="dot ${bad?'st-clean':(dn===c.items.length?'st-ok':'st-none')}"></span>
+        <span class="nm">${esc(areaName(c.area))}</span>
+        <span class="pr">${dn}/${c.items.length}${bad?` · ${t('tasksN', bad)}`:''}</span>
+        <span class="chev">${draft.open===ci?'⌄':'›'}</span></button>
+      ${draft.open===ci ? c.items.map((it,ii) => itemHTML(it, ci, ii)).join('') : ''}
+    </div>`;
+  }).join('')}`;
+  addSticky(done ? t('saveResult', done, total) : t('pickOne'), finishInspect, !done);
+  bindAll('[data-cat]', b => { const c=+b.dataset.cat; draft.open = draft.open===c ? -1 : c; render() });
+  bindItem();
+}
+function itemHTML(it, ci, ii){
+  const key = ci+'-'+ii, v = draft.res[key];
+  let h = `<div class="item"><div class="nm"><span class="dot ${v?'st-'+STATUS[v.st].c:'st-none'}"></span>${esc(itemName(it.item))}</div>
+    <div class="sts">${ORDER.map(k =>
+      `<button class="st-${STATUS[k].c} ${v&&v.st===k?'on':''}" data-set="${key}|${k}">${ss(k)}</button>`).join('')}</div>`;
+  if(v && v.st!=='ok'){
+    h += `<div style="margin-top:9px">
+      <input type="text" placeholder="${t('noteHint')}" value="${esc(v.note||'')}" data-note="${key}">
+      <div class="thumbs">
+        ${(v.ph||[]).map((p,pi) => `<span class="th"><img src="${p.url}" data-zoom="${p.url}" alt="">
+          <button class="x" data-rmph="${key}|${pi}">×</button></span>`).join('')}
+        <button class="addph" data-cam="${key}" title="${t('takePhoto')}">📷</button>
+        <button class="addph" data-lib="${key}" title="${t('fromLibrary')}">🖼</button></div></div>`;
+  }
+  return h + '</div>';
+}
+function bindItem(){
+  bindAll('[data-set]', b => {
+    const [key, st] = b.dataset.set.split('|');
+    const cur = draft.res[key] || {};
+    draft.res[key] = {st, note:cur.note||'', ph:cur.ph||[], area:null};
+    render();
+  });
+  document.querySelectorAll('[data-note]').forEach(el =>
+    el.oninput = () => { draft.res[el.dataset.note].note = el.value });
+  bindAll('[data-zoom]', i => lightbox(i.dataset.zoom));
+  const addTo = (key, ph) => {
+    const v = draft.res[key];
+    v.ph = (v.ph||[]).concat(ph).slice(0,4);
+    render(); toast(t('photoAdded', ph.length));
+  };
+  bindAll('[data-cam]', b => pickPhotos(ph => addTo(b.dataset.cam, ph), true));
+  bindAll('[data-lib]', b => pickPhotos(ph => addTo(b.dataset.lib, ph), false));
+  bindAll('[data-rmph]', b => {
+    const [key, pi] = b.dataset.rmph.split('|');
+    draft.res[key].ph.splice(+pi, 1); render();
+  });
+}
+async function finishInspect(){
+  const r = draft.room;
+  busy(true);
+  const {data: insp, error: e1} = await sb.from('inspections').insert({
+    room_id: r.id, inspector_id: me.id, inspector_name: me.name,
+    checked_count: Object.keys(draft.res).length
+  }).select().single();
+  if(e1){ busy(false); return toast(t('errSave') + e1.message) }
+
+  const bad = Object.entries(draft.res).filter(([,v]) => v.st !== 'ok');
+  const rows = [];
+  for(const [key, v] of bad){
+    const [ci, ii] = key.split('-').map(Number);
+    const paths = [];
+    for(let n=0; n<(v.ph||[]).length; n++){
+      const path = `${r.id}/${insp.id}/${key}-${n}.jpg`;
+      const {error} = await sb.storage.from('photos').upload(path, v.ph[n].blob, {contentType:'image/jpeg'});
+      if(!error) paths.push(path);
+    }
+    rows.push({ inspection_id: insp.id, room_id: r.id,
+      area: draft.cl[ci].area, item: draft.cl[ci].items[ii].item,
+      status: v.st, note: v.note||'', photos: paths, created_by_name: me.name });
+  }
+  if(rows.length){
+    const {error: e2} = await sb.from('issues').insert(rows);
+    if(e2){ busy(false); return toast(t('errIssue') + e2.message) }
+  }
+  draft = null;
+  await loadAll();
+  toast(rows.length ? t('savedIssues', rows.length) : t('savedOk'));
+  go('room', {id:r.id});
+}
+
+/* ============ VIỆC CẦN LÀM ============ */
+function vTasks(){
+  head(t('tabTasks'));
+  if(!openIssues.length){
+    $('#view').innerHTML = `<div class="card"><div class="empty"><b>${t('noTasks')}</b>${t('noTasksHint')}</div></div>`;
+    return;
+  }
+  const f = nav.f || 'all';
+  const list = f==='all' ? openIssues : openIssues.filter(x => x.status===f);
+  const cnt = k => openIssues.filter(x => x.status===k).length;
+  const grp = new Map();
+  list.forEach(x => { if(!grp.has(x.room_id)) grp.set(x.room_id, []); grp.get(x.room_id).push(x) });
+  $('#view').innerHTML = `
+  <div class="pillrow" style="margin-bottom:12px">
+    <button class="pill ${f==='all'?'on':''}" data-f="all">${t('fAll')} ${openIssues.length}</button>
+    ${ORDER.slice(1).filter(cnt).map(k =>
+      `<button class="pill ${f===k?'on':''}" data-f="${k}">${sl(k)} ${cnt(k)}</button>`).join('')}
+  </div>
+  ${[...grp.entries()].map(([rid, g]) => {
+    const r = rooms.find(x => x.id === rid) || {name:'?', building_name:''};
+    return `<div class="card">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px">
+        <h2 style="font-size:15.5px;flex:1">${esc(rname(r))}</h2>
+        <span class="muted" style="font-size:12px">${esc(r.building_name)}</span></div>
+      ${g.map(x => issueRow(x, false)).join('')}</div>`;
+  }).join('')}`;
+  bindAll('[data-f]', b => go('tasks', {f:b.dataset.f}));
+  bindIssues();
+}
+
+/* ============ CÀI ĐẶT ============ */
+function vSetup(){
+  head(t('tabSetup'));
+  const items = checklist.reduce((a,c) => a + c.items.length, 0);
+  $('#view').innerHTML = `
+  <div class="card">
+    <div class="eyebrow">${t('account')}</div>
+    <div style="font-size:16px;font-weight:650">${esc(me.name)}
+      <span class="tag ${me.admin?'st-ok':'st-none'}" style="margin-left:6px">${me.admin?t('roleAdmin'):t('roleStaff')}</span></div>
+    <div class="muted">${esc(me.email)}</div>
+    <div class="hr"></div>
+    <label class="f" style="margin:0"><span>${t('displayName')}</span>
+      <input type="text" id="nm" value="${esc(me.name)}"></label>
+  </div>
+  <div class="card">
+    <div class="eyebrow">${t('facility')}</div>
+    ${me.admin ? `<button class="row" id="adm"><span class="main">
+        <span class="t1">${t('manageRooms')}</span>
+        <span class="t2">${t('roomsCount', rooms.filter(r=>!r.is_common).length)} · ${t('commonCount', rooms.filter(r=>r.is_common).length)} · ${t('buildingsN', new Set(rooms.map(r=>r.building_id)).size)}</span>
+      </span><span class="chev">›</span></button>`
+    : `<div class="row"><span class="main"><span class="t1">${t('roomsCount', rooms.filter(r=>!r.is_common).length)}</span>
+        <span class="t2">${t('commonCount', rooms.filter(r=>r.is_common).length)} · ${t('buildingsN', new Set(rooms.map(r=>r.building_id)).size)}</span></span></div>`}
+    <div class="row"><span class="main"><span class="t1">${t('itemsCount', items)}</span>
+      <span class="t2">${t('areasN', checklist.length)}</span></span></div>
+    ${me.admin ? '' : `<p class="muted" style="margin:10px 0 0">${t('adminOnly')}</p>`}
+  </div>
+  ${me.admin ? `<div class="card">
+    <div class="eyebrow">${t('cycleTitle')}</div>
+    <label class="f" style="margin:0"><span>${t('cycleAll')}</span>
+      <input type="number" id="cy" min="1" value="${rooms[0]?.cycle_days ?? 7}"></label>
+    <button class="btn ghost" id="setcy">${t('applyAll')}</button>
+  </div>` : ''}
+  <div class="card"><div class="eyebrow">${t('language')}</div><div class="pillrow"><button class="pill ${lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button><button class="pill ${lang==='ja'?'on':''}" data-lang="ja">日本語</button></div></div><button class="btn danger" id="out">${t('logout')}</button>
+  <p class="muted" style="text-align:center;font-size:12px;margin-top:12px">
+    ${t('footer')}</p>
+  <p class="muted" style="text-align:center;font-size:12px;margin-top:4px">
+    <b style="font-variant-numeric:tabular-nums">${APP_VERSION}</b>
+    &nbsp;·&nbsp;<a href="#" id="hardReload">${t('forceReload')}</a></p>`;
+  $('#hardReload').onclick = e => {
+    e.preventDefault();
+    location.href = location.pathname + '?v=' + Date.now();
+  };
+  bindAll('[data-lang]', b => setLang(b.dataset.lang));
+  if(me.admin) $('#adm').onclick = () => go('admin');
+  $('#nm').onchange = async e => {
+    const name = e.target.value.trim(); if(!name) return;
+    await sb.from('profiles').update({name}).eq('id', me.id);
+    me.name = name; toast(t('nameChanged'));
+  };
+  if(me.admin) $('#setcy').onclick = async () => {
+    const cy = Math.max(1, parseInt($('#cy').value) || 7);
+    if(!confirm(t('cycleAsk', cy, rooms.length))) return;
+    busy(true);
+    const {error} = await sb.from('rooms').update({cycle_days:cy}).neq('id','00000000-0000-0000-0000-000000000000');
+    busy(false);
+    if(error) return toast(t('err')+error.message);
+    await loadAll(); toast(t('cycleDone')); render();
+  };
+  $('#out').onclick = async () => {
+    if(!confirm(t('logoutAsk'))) return;
+    await sb.auth.signOut(); me=null; rooms=[]; openIssues=[]; go('login');
+  };
+}
+
+/* ============ QUẢN LÝ TOÀ NHÀ & PHÒNG (chỉ admin) ============ */
+function parseRooms(s){
+  const out=[];
+  String(s||'').split(/[,\n;]/).forEach(p => {
+    p=p.trim(); if(!p) return;
+    const m = p.match(/^(\D*)(\d+)\s*[-–]\s*(\D*)(\d+)$/);
+    if(m){
+      const pre=m[1]||m[3], a=+m[2], b=+m[4], w=m[2].length;
+      if(b>=a && b-a<400){ for(let i=a;i<=b;i++) out.push(pre+String(i).padStart(w,'0')); return }
+    }
+    out.push(p);
+  });
+  return [...new Set(out)];
+}
+function vAdmin(){
+  if(!me.admin) return go('setup');
+  head(t('adminTitle'), t('tabSetup'), () => go('setup'));
+  const bs = [...new Map(rooms.map(r => [r.building_id, r.building_name])).entries()];
+  $('#view').innerHTML = `
+  <div class="card">
+    <div class="eyebrow">${t('addBuilding')}</div>
+    <label class="f"><span>${t('buildingName')}</span><input type="text" id="bn" placeholder="大塚B"></label>
+    <label class="f"><span>${t('roomList')}</span><input type="text" id="rl" placeholder="101-110, 201, 202"></label>
+    <p class="muted" style="margin:-4px 0 11px;font-size:12.5px">${t('rangeHint')}</p>
+    <button class="btn" id="addb">${t('addBuildingBtn')}</button>
+  </div>
+  ${bs.map(([bid, bn]) => {
+    const rs = rooms.filter(r => r.building_id === bid);
+    return `<div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <h2 style="font-size:16px;flex:1">${esc(bn)}</h2>
+        <span class="muted" style="font-size:12px">${t('roomsCount', rs.filter(x=>!x.is_common).length)}</span>
+        <button class="pill" data-renb="${bid}">${t('rename')}</button>
+        <button class="pill" data-delb="${bid}" style="color:var(--replace)">${t('del')}</button></div>
+      <div class="rack">${rs.map(r => `<button class="key st-none" data-editr="${r.id}">
+        <div class="no">${esc(r.is_common ? t('commonShort') : r.name)}</div><div class="mt">${t('days', r.cycle_days)}</div></button>`).join('')}</div>
+      <div class="hr"></div>
+      <button class="pill" data-addr="${bid}">${t('addRooms')}</button>
+    </div>`;
+  }).join('')}
+  <p class="muted" style="text-align:center;font-size:12px">${t('delWarn')}</p>`;
+
+  $('#addb').onclick = async () => {
+    const name = $('#bn').value.trim();
+    if(!name) return toast(t('needName'));
+    const list = parseRooms($('#rl').value);
+    if(!list.length) return toast(t('needRooms'));
+    busy(true);
+    const maxSort = Math.max(0, ...rooms.map(r => r.building_sort ?? 0));
+    const {data:b, error:e1} = await sb.from('buildings')
+      .insert({name, sort: maxSort + 1}).select().single();
+    if(e1){ busy(false); return toast(t('err') + e1.message) }
+    const {error:e2} = await sb.from('rooms').insert(
+      list.map((n,i) => ({building_id:b.id, name:n, sort:i})));
+    busy(false);
+    if(e2) return toast(t('err') + e2.message);
+    await loadAll(); toast(t('roomsAdded', list.length)); render();
+  };
+  bindAll('[data-addr]', async b => {
+    const v = prompt(t('askRooms')); if(!v) return;
+    const list = parseRooms(v); if(!list.length) return;
+    const bid = b.dataset.addr;
+    const base = rooms.filter(r => r.building_id === bid).length;
+    busy(true);
+    const {error} = await sb.from('rooms').insert(list.map((n,i) => ({building_id:bid, name:n, sort:base+i})));
+    busy(false);
+    if(error) return toast(t('err') + error.message);
+    await loadAll(); toast(t('roomsAdded', list.length)); render();
+  });
+  bindAll('[data-renb]', async b => {
+    const bid = b.dataset.renb;
+    const cur = rooms.find(r => r.building_id === bid)?.building_name || '';
+    const v = prompt(t('askBuildingName'), cur); if(!v || !v.trim()) return;
+    busy(true);
+    const {error} = await sb.from('buildings').update({name:v.trim()}).eq('id', bid);
+    busy(false);
+    if(error) return toast(t('err') + error.message);
+    await loadAll(); render();
+  });
+  bindAll('[data-delb]', async b => {
+    const bid = b.dataset.delb;
+    const n = rooms.filter(r => r.building_id === bid && !r.is_common).length;
+    if(!confirm(t('delBuildingAsk', n))) return;
+    busy(true);
+    const {error} = await sb.from('buildings').delete().eq('id', bid);
+    busy(false);
+    if(error) return toast(t('err') + error.message);
+    await loadAll(); toast(t('buildingDeleted')); render();
+  });
+  bindAll('[data-editr]', async b => {
+    const r = rooms.find(x => x.id === b.dataset.editr); if(!r) return;
+    const name = prompt(t('askRoomName'), r.name);
+    if(name === null) return;
+    busy(true);
+    if(!name.trim()){
+      if(confirm(t('delRoomAsk', r.name)))
+        await sb.from('rooms').delete().eq('id', r.id);
+    } else {
+      const cy = prompt(t('askCycle'), r.cycle_days);
+      await sb.from('rooms').update({
+        name: name.trim(),
+        cycle_days: Math.max(1, parseInt(cy) || r.cycle_days)
+      }).eq('id', r.id);
+    }
+    busy(false);
+    await loadAll(); render();
+  });
+}
+
+/* ============ ĐIỀU CHỈNH HẠNG MỤC THEO PHÒNG (admin) ============ */
+function vItems(){
+  if(!me.admin) return go('setup');
+  const r = rooms.find(x => x.id === nav.id);
+  if(!r) return go('rooms');
+  head(t('itemsFor', rname(r)), t('back'), () => go('room', {id:r.id}));
+  const all = itemsFor(r, true);
+  const on = all.filter(i => !exSet.has(r.id + '|' + i.id)).length;
+  $('#view').innerHTML = `
+  <p class="muted" style="margin:0 0 12px">${t('itemsHint')}</p>
+  <div class="card" style="padding:12px 14px">
+    <span class="muted" style="font-weight:650">${t('activeItems', on, all.length)}</span></div>
+  ${group(all).map(c => `<div class="card">
+    <h2 style="font-size:15.5px;margin-bottom:9px">${esc(areaName(c.area))}</h2>
+    <div class="pillrow">${c.items.map(i => {
+      const off = exSet.has(r.id + '|' + i.id);
+      const scope = i.scope_room_id ? t('onlyThisRoom') : (i.scope_building_id ? t('onlyThisBuilding') : '');
+      return `<button class="pill ${off?'':'on'}" data-tog="${i.id}">${esc(itemName(i.item))}${scope?` · ${scope}`:''}</button>`;
+    }).join('')}</div></div>`).join('')}
+  <button class="btn ghost" id="addi">${t('addItem')}</button>`;
+  bindAll('[data-tog]', async b => {
+    const id = b.dataset.tog, key = r.id + '|' + id, off = exSet.has(key);
+    busy(true);
+    const res = off
+      ? await sb.from('checklist_exclusions').delete().eq('room_id', r.id).eq('checklist_id', id)
+      : await sb.from('checklist_exclusions').insert({room_id:r.id, checklist_id:id});
+    busy(false);
+    if(res.error) return toast(t('err') + res.error.message);
+    if(off) exSet.delete(key); else exSet.add(key);
+    toast(off ? t('itemOn') : t('itemOff')); render();
+  });
+  $('#addi').onclick = async () => {
+    const areas = [...new Set(all.map(i => i.area))];
+    const a = prompt(t('askArea') + '\n' + areas.map((x,i) => (i+1)+'. '+areaName(x)).join('\n'), '1');
+    if(a === null) return;
+    const area = areas[Math.max(0, (parseInt(a)||1) - 1)];
+    const name = prompt(t('askItem')); if(!name || !name.trim()) return;
+    const sameArea = all.filter(i => i.area === area);
+    busy(true);
+    const {error} = await sb.from('checklist').insert({
+      area, item: name.trim(),
+      area_ja: AJ.get(area) || null, item_ja: lang === 'ja' ? name.trim() : null,
+      area_sort: sameArea[0]?.area_sort ?? 99,
+      item_sort: (sameArea[sameArea.length-1]?.item_sort ?? 0) + 1,
+      common_only: !!r.is_common, scope_room_id: r.id
+    });
+    busy(false);
+    if(error) return toast(t('err') + error.message);
+    await loadAll(); toast(t('itemAdded')); render();
+  };
+}
+
+/* ============ BẢNG NHẬP ============ */
+function closeSheet(){ const el = $('#sheet'); el.classList.remove('on'); el.innerHTML = '' }
+function sheet(title, html, onSave){
+  const el = $('#sheet');
+  el.innerHTML = `<div class="box">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+      <h2 style="flex:1;font-size:17px">${esc(title)}</h2>
+      <button class="pill" id="shX">${t('cancel')}</button></div>
+    ${html}
+    <button class="btn" id="shOK" style="margin-top:4px">${t('save')}</button></div>`;
+  el.classList.add('on');
+  el.onclick = e => { if(e.target === el) closeSheet() };
+  $('#shX').onclick = closeSheet;
+  $('#shOK').onclick = onSave;
+}
+const UNITS = ['cái','chai','bịch','cuộn','hộp','gói','túi','thùng','bộ','kg'];
+const unitPills = id => `<div class="pillrow" style="margin:-4px 0 12px">${UNITS.map(u =>
+  `<button class="pill" data-unit="${u}|${id}" style="font-size:12px;padding:5px 10px">${u}</button>`).join('')}</div>`;
+function bindUnitPills(){
+  bindAll('[data-unit]', b => { const p = b.dataset.unit.split('|'); const el = $('#'+p[1]); if(el) el.value = p[0] });
+}
+
+/* ============ KHO ĐỒ DÙNG ============ */
+const locName  = l => (lang==='ja' && l.name_ja) || l.name;
+const itName   = i => (lang==='ja' && i.name_ja) || i.name;
+const unitName = i => (lang==='ja' && i.unit_ja) || i.unit;
+const lvOf     = (locId, itemId) => stLv.get(locId + '|' + itemId);
+function locStats(l){
+  let n = 0, low = 0;
+  stItems.forEach(i => {
+    const v = lvOf(l.id, i.id);
+    if(!v) return;
+    n++;
+    if(i.min_qty > 0 && v.qty <= i.min_qty) low++;
+  });
+  return {n, low};
+}
+function vStock(){
+  head(t('stock'));
+  if(!stLocs.length){
+    $('#view').innerHTML = `<div class="card"><div class="empty"><b>${t('noStock')}</b>${t('errTable')}</div></div>`;
+    return;
+  }
+  const sect = (kind, title) => {
+    const ls = stLocs.filter(l => l.kind === kind);
+    if(!ls.length) return '';
+    return `<div class="card"><div class="eyebrow">${title}</div>${ls.map(l => {
+      const st = locStats(l);
+      return `<button class="row ${st.low?'st-clean':'st-ok'}" data-loc="${l.id}">
+        <span class="dot"></span><span class="main">
+        <span class="t1">${esc(locName(l))}</span>
+        <span class="t2">${t('itemsHere', st.n)}${st.low?` · ${t('lowN', st.low)}`:''}</span></span>
+        <span class="chev">›</span></button>`;
+    }).join('')}</div>`;
+  };
+  $('#view').innerHTML = sect('warehouse', t('warehouses')) + sect('cabinet', t('cabinets'))
+    + (me.admin ? `<button class="btn ghost" id="mi">${t('manageItems')}</button>` : '');
+  bindAll('[data-loc]', b => go('stockLoc', {id:b.dataset.loc}));
+  if(me.admin) $('#mi').onclick = () => go('stockItems');
+}
+function vStockLoc(){
+  const l = stLocs.find(x => x.id === nav.id);
+  if(!l) return go('stock');
+  head(locName(l), t('back'), () => go('stock'));
+  const here = stItems.filter(i => lvOf(l.id, i.id));
+  $('#view').innerHTML = (here.length ? `<div class="card" style="padding:0 14px">${here.map(i => {
+      const v = lvOf(l.id, i.id), out = v.qty <= 0;
+      const emin = v.min_qty != null ? v.min_qty : i.min_qty;
+      const low = !out && emin > 0 && v.qty <= emin;
+      return `<div class="row ${out?'st-replace':(low?'st-clean':'st-ok')}">
+        <span class="dot"></span>
+        <button class="main" data-edit="${i.id}" style="text-align:left"><span class="t1">${esc(itName(i))}</span>
+          <span class="t2">${esc(unitName(i))}${emin>0?` · ${v.min_qty!=null?t('ownMin', emin):t('globalMin', emin)}`:''}${v.updated_by_name?` · ${esc(v.updated_by_name)} ${dstr(v.updated_at)}`:''}</span></button>
+        <span style="display:flex;align-items:center;gap:6px;flex:none">
+          ${out?`<span class="tag">${t('outStock')}</span>`:(low?`<span class="tag">${t('lowStock')}</span>`:'')}
+          <button class="pill" data-d="${i.id}|-1" style="width:34px;text-align:center">−</button>
+          <button class="pill" data-set="${i.id}" style="min-width:52px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px">${v.qty}</button>
+          <button class="pill" data-d="${i.id}|1" style="width:34px;text-align:center">＋</button>
+        </span></div>`;
+    }).join('')}</div>`
+    : `<div class="card"><div class="empty"><b>${t('noStock')}</b>${t('noStockHint')}</div></div>`)
+    + `<button class="btn ghost" id="add">${t('addStockItem')}</button>`;
+
+  const save = async (item, qty, delta, minL) => {
+    qty = Math.max(0, qty);
+    const prev = lvOf(l.id, item.id) || {};
+    busy(true);
+    const now = new Date().toISOString();
+    const row = {location_id:l.id, item_id:item.id, qty, updated_at:now, updated_by_name:me.name};
+    if(minL !== undefined) row.min_qty = minL;
+    const r1 = await sb.from('stock_levels').upsert(row);
+    if(!r1.error) await sb.from('stock_moves').insert({
+      location_id:l.id, item_id:item.id, delta, qty_after:qty, created_by_name:me.name});
+    busy(false);
+    if(r1.error) return toast(t('err') + r1.error.message);
+    stLv.set(l.id + '|' + item.id, {location_id:l.id, item_id:item.id, qty,
+      min_qty: minL !== undefined ? minL : (prev.min_qty != null ? prev.min_qty : null),
+      updated_at:now, updated_by_name:me.name});
+    closeSheet(); render();
+  };
+  bindAll('[data-d]', b => {
+    const [id, d] = b.dataset.d.split('|');
+    const item = stItems.find(x => x.id === id), v = lvOf(l.id, id);
+    save(item, v.qty + (+d), +d);
+  });
+  const openEdit = (item) => {
+    const v = lvOf(l.id, item.id);
+    sheet(itName(item), `
+      <label class="f"><span>${t('fQty')} (${esc(unitName(item))})</span>
+        <input type="number" id="e_qty" inputmode="numeric" value="${v.qty}"></label>
+      <label class="f"><span>${t('fMin')}</span>
+        <input type="number" id="e_min" inputmode="numeric" placeholder="${item.min_qty}" value="${v.min_qty != null ? v.min_qty : ''}"></label>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('minHintLoc', item.min_qty)}</p>
+      <button class="btn danger" id="e_rm" style="margin-bottom:10px">${t('removeHere')}</button>`,
+    () => {
+      const qi = parseInt($('#e_qty').value);
+      const q  = isNaN(qi) ? v.qty : Math.max(0, qi);
+      const mv = $('#e_min').value.trim();
+      save(item, q, q - v.qty, mv === '' ? null : Math.max(0, parseInt(mv) || 0));
+    });
+    $('#e_rm').onclick = async () => {
+      if(!confirm(t('removeAsk', itName(item)))) return;
+      busy(true);
+      const {error} = await sb.from('stock_levels').delete()
+        .eq('location_id', l.id).eq('item_id', item.id);
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      stLv.delete(l.id + '|' + item.id);
+      closeSheet(); toast(t('removed')); render();
+    };
+  };
+  bindAll('[data-edit]', b => openEdit(stItems.find(x => x.id === b.dataset.edit)));
+  bindAll('[data-set]',  b => openEdit(stItems.find(x => x.id === b.dataset.set)));
+
+  $('#add').onclick = () => {
+    const avail = stItems.filter(i => !lvOf(l.id, i.id));
+    sheet(t('addItemTitle', locName(l)), `
+      <label class="f"><span>${t('fName')}</span>
+        <input type="text" id="a_name" autocapitalize="sentences"></label>
+      ${avail.length ? `<p class="muted" style="margin:-6px 0 6px;font-size:12.5px">${t('fromCatalog')}</p>
+      <div class="pillrow" style="margin-bottom:12px">${avail.map(i =>
+        `<button class="pill" data-pick="${i.id}" style="font-size:12px;padding:5px 10px">${esc(itName(i))}</button>`).join('')}</div>` : ''}
+      <label class="f"><span>${t('fUnit')}</span>
+        <input type="text" id="a_unit" value="cái"></label>
+      ${unitPills('a_unit')}
+      <label class="f"><span>${t('fQty')}</span>
+        <input type="number" id="a_qty" inputmode="numeric" value="0"></label>
+      <label class="f"><span>${t('fMin')}</span>
+        <input type="number" id="a_min" inputmode="numeric" value="0"></label>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('minHintG')}</p>`,
+    async () => {
+      const name = $('#a_name').value.trim();
+      if(!name) return toast(t('nameNeeded'));
+      const unit = $('#a_unit').value.trim() || 'cái';
+      const qty  = Math.max(0, parseInt($('#a_qty').value) || 0);
+      const minQ = Math.max(0, parseInt($('#a_min').value) || 0);
+      let item = stItems.find(i => i.name.toLowerCase() === name.toLowerCase()
+                               || (i.name_ja || '').toLowerCase() === name.toLowerCase());
+      if(!item){
+        if(!me.admin) return toast(t('adminOnlyNew'));
+        busy(true);
+        const ins = await sb.from('stock_items').insert({
+          name, unit, min_qty:minQ,
+          sort:(stItems[stItems.length-1]?.sort ?? 0) + 1}).select().single();
+        busy(false);
+        if(ins.error) return toast(t('err') + ins.error.message);
+        item = ins.data; stItems.push(item);
+        save(item, qty, qty);
+      } else {
+        save(item, qty, qty, minQ !== item.min_qty ? minQ : null);
+      }
+    });
+    bindUnitPills();
+    bindAll('[data-pick]', b => {
+      const i = stItems.find(x => x.id === b.dataset.pick);
+      $('#a_name').value = itName(i); $('#a_unit').value = unitName(i);
+      $('#a_min').value = i.min_qty || 0;
+    });
+  };
+}
+function vStockItems(){
+  if(!me.admin) return go('stock');
+  head(t('manageItems'), t('stock'), () => go('stock'));
+  $('#view').innerHTML = `
+  <p class="muted" style="margin:0 0 12px">${t('manageItemsHint')}</p>
+  <div class="card" style="padding:0 14px">${stItems.map(i => `<button class="row" data-ei="${i.id}">
+    <span class="main"><span class="t1">${esc(itName(i))}</span>
+    <span class="t2">${t('unitOf', esc(unitName(i)))}${i.min_qty>0?` · ${t('minOf', i.min_qty)}`:''}</span></span>
+    <span class="chev">›</span></button>`).join('')}</div>
+  <button class="btn ghost" id="ni">${t('newItem')}</button>`;
+  const ask = (cur) => {
+    sheet(cur ? itName(cur) : t('newItem').replace('＋ ', ''), `
+      <label class="f"><span>${t('fName')}</span>
+        <input type="text" id="i_name" value="${cur ? esc(cur.name) : ''}"></label>
+      <label class="f"><span>${t('fUnit')}</span>
+        <input type="text" id="i_unit" value="${cur ? esc(cur.unit) : 'cái'}"></label>
+      ${unitPills('i_unit')}
+      <label class="f"><span>${t('fMin')}</span>
+        <input type="number" id="i_min" inputmode="numeric" value="${cur ? cur.min_qty : 0}"></label>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('minHintG')}</p>
+      ${cur ? `<button class="btn danger" id="i_del" style="margin-bottom:10px">${t('delFromCatalog')}</button>` : ''}`,
+    async () => {
+      const name = $('#i_name').value.trim();
+      if(!name) return toast(t('nameNeeded'));
+      const row = {name, unit:$('#i_unit').value.trim() || 'cái',
+                   min_qty:Math.max(0, parseInt($('#i_min').value) || 0)};
+      busy(true);
+      const {error} = cur
+        ? await sb.from('stock_items').update(row).eq('id', cur.id)
+        : await sb.from('stock_items').insert({...row, sort:(stItems[stItems.length-1]?.sort ?? 0) + 1});
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      await loadAll(); closeSheet(); toast(t('itemSaved')); render();
+    });
+    bindUnitPills();
+    if(cur) $('#i_del').onclick = async () => {
+      if(!confirm(t('delItemAsk', itName(cur)))) return;
+      busy(true);
+      const {error} = await sb.from('stock_items').delete().eq('id', cur.id);
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      await loadAll(); closeSheet(); render();
+    };
+  };
+  bindAll('[data-ei]', b => ask(stItems.find(x => x.id === b.dataset.ei)));
+  $('#ni').onclick = () => ask(null);
+}
+
+/* ============ KHỞI ĐỘNG ============ */
+async function boot(){
+  const {data:{session}} = await sb.auth.getSession();
+  if(!session){ go('login'); return }
+  const u = session.user;
+  const {data:p} = await sb.from('profiles').select('name, role').eq('id', u.id).single();
+  me = {id:u.id, email:u.email, name:(p?.name || u.email.split('@')[0]), admin:(p?.role === 'admin')};
+  const ok = await loadAll();
+  go(ok ? 'home' : 'setup');
+}
+boot();
+</script>
+</body>
+</html>
