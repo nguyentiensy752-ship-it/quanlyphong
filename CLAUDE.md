@@ -187,3 +187,4 @@ Chạy theo đúng thứ tự này trên một database trống. Database hiện
 | `sua-quyen-quan-ly.sql` | Tiện ích gán lại quyền admin cho một email |
 | `supabase-buoc6.sql` | Thùng rác 30 ngày, sổ sao lưu ảnh, cron gọi Edge Function, chỉ xoá ảnh đã lên Drive |
 | `supabase-buoc7.sql` | Tạm tắt lịch sao lưu Drive (chưa cài), Cài đặt hiện dung lượng ảnh. Bật lại: chạy lại bước 6 |
+| `supabase-buoc8.sql` | Trigger: toà mới tự có tủ kho + 共用部; đổi tên toà thì đổi tên tủ; bù cho toà đang thiếu |
