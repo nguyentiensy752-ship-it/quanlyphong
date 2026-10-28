@@ -18,12 +18,14 @@ Người dùng: chủ dự án (quản lý) + vài nhân viên dọn phòng, m�
 
 ---
 
-## 2. Kiến trúc — chỉ có hai thành phần
+## 2. Kiến trúc
 
 | Thành phần | Nằm ở đâu | Vai trò |
 |---|---|---|
 | `index.html` | repo này, chạy trên GitHub Pages | Toàn bộ giao diện và logic |
 | Supabase | `https://ukglohmssluajtkghpva.supabase.co` | Database, đăng nhập, lưu ảnh |
+| Edge Function `archive-photos` | `supabase/functions/archive-photos/index.ts`, dán tay vào Supabase | Chép ảnh sang Google Drive mỗi giờ |
+| Google Drive | Gmail của chủ dự án | Kho ảnh lâu dài (xem `HUONG-DAN-GOOGLE-DRIVE.md`) |
 
 Không có bước build, không framework, không `node_modules`.
 Một file HTML duy nhất, dùng `<script type="module">` và import supabase-js từ esm.sh.
@@ -35,19 +37,21 @@ Một file HTML duy nhất, dùng `<script type="module">` và import supabase-j
 ## 3. Lược đồ database (Supabase / Postgres)
 
 ```
-buildings            id, name, sort
-rooms                id, building_id, name, sort, cycle_days, is_common
+buildings            id, name, sort, deleted_at, deleted_by_name
+rooms                id, building_id, name, sort, cycle_days, is_common, deleted_at, deleted_by_name
 checklist            id, area, item, area_ja, item_ja, area_sort, item_sort,
                      common_only, scope_building_id, scope_room_id
 checklist_exclusions room_id, checklist_id          -- tắt hạng mục cho 1 phòng
 inspections          id, room_id, inspector_id, inspector_name, checked_count, created_at
 issues               id, inspection_id, room_id, area, item, status, note, photos[],
-                     created_by_name, resolved_at, resolved_by, resolved_by_name
+                     archived_photos[], created_by_name, resolved_at, resolved_by, resolved_by_name
 profiles             id (= auth.users.id), name, role ('admin' | 'staff')
 stock_locations      id, name, name_ja, kind ('warehouse'|'cabinet'), building_id, sort
 stock_items          id, name, name_ja, unit, unit_ja, min_qty, sort, active
 stock_levels         location_id, item_id, qty, min_qty (ngưỡng riêng), updated_by_name
 stock_moves          id, location_id, item_id, delta, qty_after, created_by_name
+photo_archive        path, drive_file_id, taken_at, archived_at, purged_at   -- RLS, không policy
+archive_log          id, ran_at, copied, failed, message                     -- RLS, không policy
 ```
 
 `issues.status` chỉ nhận: `clean` | `refill` | `replace` | `broken`.
@@ -59,7 +63,16 @@ Lưu ý: `create or replace view` KHÔNG chèn được cột vào giữa — ph
 rồi tạo lại. Đây là lỗi đã từng xảy ra.
 
 **Bucket ảnh:** `photos`, chế độ private. Ảnh hiển thị qua signed URL hết hạn sau 1 giờ.
-Cron job `purge-old-photos` chạy 03:00 giờ Nhật mỗi ngày, xoá ảnh cũ hơn 3 tháng.
+
+**Vòng đời ảnh và thùng rác** (cron, giờ Nhật):
+- `archive-photos-drive` — mỗi giờ phút 15, gọi Edge Function chép ảnh đã quá 1 ngày sang Drive,
+  ghi vào `photo_archive`.
+- `purge-old-photos` — 03:00, xoá khỏi Supabase ảnh cũ hơn 3 tháng **chỉ khi đã có trong
+  `photo_archive`**; chuyển đường dẫn từ `issues.photos` sang `issues.archived_photos`.
+- `purge-trash` — 03:30, xoá hẳn toà nhà / phòng có `deleted_at` quá 30 ngày.
+
+Xoá toà nhà / phòng trong app chỉ đặt `deleted_at`. View `room_overview` lọc bỏ chúng;
+khoá chống trùng tên chỉ áp dụng cho bản ghi chưa xoá (`where deleted_at is null`).
 
 ---
 
@@ -96,9 +109,13 @@ Thêm hạng mục mới mà quên `item_ja` thì người dùng tiếng Nhật 
 - Kiểm tra phòng **không tự trừ kho**. Đánh dấu "Bổ sung" ở phòng không làm giảm số lượng
   ở kho. Cố ý tách rời để quy trình đơn giản và tránh sai số.
 - **Chưa có màn hình xem lịch sử xuất nhập kho**, dù dữ liệu đã ghi đủ trong `stock_moves`.
-- **Chưa có thùng rác.** Xoá toà nhà là xoá dây chuyền cả phòng, lịch sử và ảnh.
-- **Ảnh xoá sau 3 tháng không khôi phục được.** Nếu có tranh chấp với chủ nhà hoặc khách,
-  bằng chứng ảnh biến mất sau 90 ngày.
+- **Google Drive CHƯA được cài** (quyết định 2026-10-28: số ảnh còn ít). Lịch `archive-photos-drive`
+  đang tắt, nên không ảnh nào bị xoá và dung lượng Supabase tăng dần (gói miễn phí 1GB).
+  Màn Cài đặt hiện dung lượng và cảnh báo khi vượt 800MB. Khi bật Drive, ảnh cũ chỉ còn trên
+  Drive, không xem được trong app.
+- Ảnh nhân viên xoá trong vòng 1 ngày đầu thì mất hẳn (chưa kịp sao lưu); xoá sau đó thì bản
+  trên Drive vẫn còn.
+- Thùng rác chỉ có cho toà nhà và phòng; xoá hạng mục, mặt hàng, ảnh vẫn là xoá ngay.
 - Lịch sử kiểm tra hiển thị tối đa 30 lượt gần nhất mỗi phòng.
 - Một số hộp thoại trong phần quản lý phòng và hạng mục vẫn dùng `prompt()` — nên thay dần
   bằng bảng nhập (hàm `sheet()` đã có sẵn trong app).
@@ -110,6 +127,7 @@ Thêm hạng mục mới mà quên `item_ja` thì người dùng tiếng Nhật 
 ## 6. Quy ước khi sửa
 
 - **Giữ nguyên một file.** Đừng tách ra nhiều file hay thêm bước build.
+  (Ngoại lệ duy nhất: code Edge Function trong `supabase/functions/`, chạy phía Supabase.)
 - **Tăng `APP_VERSION`** ở đầu phần script mỗi lần sửa. Chủ dự án kiểm tra số này trong
   màn Cài đặt để biết bản mới đã lên chưa.
 - **Mọi chuỗi hiển thị phải đi qua `t()`** và có đủ cả hai ngôn ngữ trong `I18N.vi` và `I18N.ja`.
@@ -137,6 +155,8 @@ Repo này **public**. Mọi thứ trong đây ai cũng đọc được.
 - `SUPABASE_ANON` trong `index.html` là key công khai theo thiết kế — không sao.
 - **`service_role` key TUYỆT ĐỐI không được xuất hiện trong repo**, kể cả trong file `.sql`
   hay comment. Nó nằm trong Supabase Vault, tên secret `service_role_key`.
+- Tương tự với `GOOGLE_CLIENT_SECRET` và `GOOGLE_REFRESH_TOKEN` — chỉ nằm trong
+  Supabase → Edge Functions → Secrets.
 - Không đưa email hay mật khẩu tài khoản nhân viên vào repo.
 
 ---
@@ -165,3 +185,5 @@ Chạy theo đúng thứ tự này trên một database trống. Database hiện
 | `supabase-buoc3-4-gop.sql` | Khu vực chung, hạng mục theo phạm vi, toàn bộ hệ thống kho |
 | `supabase-buoc5.sql` | Ngưỡng cảnh báo riêng cho từng kho/tủ (`stock_levels.min_qty`) |
 | `sua-quyen-quan-ly.sql` | Tiện ích gán lại quyền admin cho một email |
+| `supabase-buoc6.sql` | Thùng rác 30 ngày, sổ sao lưu ảnh, cron gọi Edge Function, chỉ xoá ảnh đã lên Drive |
+| `supabase-buoc7.sql` | Tạm tắt lịch sao lưu Drive (chưa cài), Cài đặt hiện dung lượng ảnh. Bật lại: chạy lại bước 6 |

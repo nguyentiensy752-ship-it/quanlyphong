@@ -154,7 +154,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = 'https://ukglohmssluajtkghpva.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ2xvaG1zc2x1YWp0a2docHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDgzNjksImV4cCI6MjEwMzIyNDM2OX0.5Fr7mOWEjDG0uz8VNbtWiof50IJnkCYjTe9BI2Ptkdw';
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-const APP_VERSION = 'v7 · 2026-09-30';
+const APP_VERSION = 'v9 · 2026-10-28';
 
 
 /* ============ NGÔN NGỮ / 言語 ============ */
@@ -197,17 +197,24 @@ const I18N = {
   cycleTitle:'Chu kỳ kiểm tra', cycleAll:'Đặt chu kỳ cho toàn bộ phòng (ngày)',
   applyAll:'Áp dụng cho tất cả', cycleAsk:'Đặt chu kỳ {0} ngày cho toàn bộ {1} phòng?',
   cycleDone:'Đã cập nhật chu kỳ', logoutAsk:'Đăng xuất khỏi thiết bị này?',
-  footer:'Ảnh tự xoá sau 3 tháng. Trên iPhone: Safari → Chia sẻ → Thêm vào MH chính.',
+  footer:'Ảnh chỉ xoá khỏi máy chủ khi đã có bản sao lưu. Trên iPhone: Safari → Chia sẻ → Thêm vào MH chính.',
   language:'Ngôn ngữ', forceReload:'Tải lại bản mới nhất',
   adminTitle:'Toà nhà & phòng', addBuilding:'Thêm toà nhà mới', buildingName:'Tên toà nhà',
   roomList:'Danh sách phòng', rangeHint:'Gạch ngang cho dải liên tục, dấu phẩy để ngăn cách.',
   addBuildingBtn:'Thêm toà nhà', rename:'Đổi tên', del:'Xoá',
-  addRooms:'＋ Thêm phòng vào toà này', delWarn:'Xoá phòng sẽ xoá cả lịch sử kiểm tra và ảnh của phòng đó.',
+  addRooms:'＋ Thêm phòng vào toà này', delWarn:'Toà nhà / phòng bị xoá nằm trong thùng rác 30 ngày, khôi phục được trong thời gian đó.',
   needName:'Nhập tên toà nhà', needRooms:'Nhập ít nhất một phòng, vd: 101-110',
   roomsAdded:'Đã thêm {0} phòng', askRooms:'Danh sách phòng cần thêm (vd: 401-408):',
-  askBuildingName:'Tên toà nhà:', delBuildingAsk:'Xoá toà nhà này cùng {0} phòng, toàn bộ lịch sử kiểm tra và ảnh? Không khôi phục được.',
-  buildingDeleted:'Đã xoá toà nhà', askRoomName:'Số / tên phòng (để trống rồi OK để xoá phòng):',
-  askCycle:'Chu kỳ kiểm tra (ngày):', delRoomAsk:'Xoá phòng {0} cùng lịch sử và ảnh?',
+  askBuildingName:'Tên toà nhà:', delBuildingAsk:'Chuyển toà nhà này cùng {0} phòng vào thùng rác? Khôi phục được trong 30 ngày, sau đó xoá hẳn.',
+  buildingDeleted:'Đã chuyển toà nhà vào thùng rác', askRoomName:'Số / tên phòng (để trống rồi OK để xoá phòng):',
+  askCycle:'Chu kỳ kiểm tra (ngày):', delRoomAsk:'Chuyển phòng {0} vào thùng rác? Khôi phục được trong 30 ngày.',
+  roomDeleted:'Đã chuyển phòng vào thùng rác', trash:'Thùng rác', restore:'Khôi phục', restored:'Đã khôi phục',
+  trashLeft:'Xoá hẳn sau {0} ngày', trashBy:'Xoá bởi {0}', trashBuilding:'Cả toà nhà',
+  onDrive:'{0} ảnh đã chuyển sang Google Drive',
+  backupTitle:'Lưu trữ ảnh', backupUsage:'{0} ảnh · {1} / 1 GB (gói miễn phí)',
+  backupOff:'Chưa bật sao lưu Google Drive. Ảnh được giữ nguyên, không tự xoá.', backupFull:'Dung lượng sắp đầy — nên bật sao lưu Google Drive.', backupDone:'Đã sao lưu {0} ảnh', backupLast:'Lần gần nhất: {0}',
+  backupPending:'{0} ảnh đang chờ sao lưu', backupNone:'Chưa sao lưu ảnh nào. Xem HUONG-DAN-GOOGLE-DRIVE.md để cài đặt.',
+  backupErr:'Lỗi gần nhất: {0}', backupSafe:'Ảnh chưa sao lưu sẽ không bị xoá.',
   errLoad:'Lỗi tải dữ liệu: ', err:'Lỗi: ', errSave:'Không lưu được: ',
   errSavePhoto:'Không lưu được ảnh: ', errDel:'Không xoá được: ', errIssue:'Lưu vấn đề thất bại: ',
   today:'hôm nay', yesterday:'hôm qua', daysAgo:'{0} ngày trước',
@@ -285,17 +292,24 @@ const I18N = {
   cycleTitle:'点検周期', cycleAll:'全客室の点検周期（日）',
   applyAll:'すべてに適用', cycleAsk:'全{1}室の点検周期を{0}日に設定しますか？',
   cycleDone:'点検周期を更新しました', logoutAsk:'この端末からログアウトしますか？',
-  footer:'写真は3か月後に自動削除されます。iPhone: Safari → 共有 → ホーム画面に追加。',
+  footer:'写真はバックアップ済みの場合のみサーバーから削除されます。iPhone: Safari → 共有 → ホーム画面に追加。',
   language:'言語', forceReload:'最新版を再読み込み',
   adminTitle:'建物・客室', addBuilding:'建物を追加', buildingName:'建物名',
   roomList:'客室リスト', rangeHint:'連続する番号はハイフン、区切りはカンマを使用します。',
   addBuildingBtn:'建物を追加', rename:'名前変更', del:'削除',
-  addRooms:'＋ この建物に客室を追加', delWarn:'客室を削除すると点検履歴と写真もすべて削除されます。',
+  addRooms:'＋ この建物に客室を追加', delWarn:'削除した建物・客室はゴミ箱に30日間保管され、その間は復元できます。',
   needName:'建物名を入力してください', needRooms:'客室を1つ以上入力してください（例：101-110）',
   roomsAdded:'{0}室を追加しました', askRooms:'追加する客室（例：401-408）:',
-  askBuildingName:'建物名:', delBuildingAsk:'この建物と{0}室、点検履歴と写真をすべて削除しますか？元に戻せません。',
-  buildingDeleted:'建物を削除しました', askRoomName:'部屋番号（空欄でOKすると削除）:',
-  askCycle:'点検周期（日）:', delRoomAsk:'{0}号室を履歴・写真ごと削除しますか？',
+  askBuildingName:'建物名:', delBuildingAsk:'この建物と{0}室をゴミ箱に移しますか？30日以内なら復元でき、その後完全に削除されます。',
+  buildingDeleted:'建物をゴミ箱に移しました', askRoomName:'部屋番号（空欄でOKすると削除）:',
+  askCycle:'点検周期（日）:', delRoomAsk:'{0}号室をゴミ箱に移しますか？30日以内なら復元できます。',
+  roomDeleted:'客室をゴミ箱に移しました', trash:'ゴミ箱', restore:'復元', restored:'復元しました',
+  trashLeft:'あと{0}日で完全削除', trashBy:'削除者: {0}', trashBuilding:'建物全体',
+  onDrive:'写真{0}枚はGoogleドライブに移動済み',
+  backupTitle:'写真の保存', backupUsage:'写真{0}枚 · {1} / 1 GB（無料プラン）',
+  backupOff:'Googleドライブへのバックアップは未設定です。写真は自動削除されず保持されます。', backupFull:'容量が上限に近づいています。Googleドライブへのバックアップを設定してください。', backupDone:'{0}枚バックアップ済み', backupLast:'最終: {0}',
+  backupPending:'{0}枚がバックアップ待ち', backupNone:'まだバックアップがありません。HUONG-DAN-GOOGLE-DRIVE.md を参照して設定してください。',
+  backupErr:'直近のエラー: {0}', backupSafe:'バックアップされていない写真は削除されません。',
   errLoad:'読み込みエラー: ', err:'エラー: ', errSave:'保存できませんでした: ',
   errSavePhoto:'写真を保存できませんでした: ', errDel:'削除できませんでした: ', errIssue:'記録の保存に失敗しました: ',
   today:'今日', yesterday:'昨日', daysAgo:'{0}日前',
@@ -365,6 +379,7 @@ let allItems = [];
 let stLocs = [], stItems = [], stLv = new Map();
 let exSet = new Set();
 let openIssues = [];      // issues chưa đóng
+let trash = {b:[], r:[]}; // toà nhà / phòng trong thùng rác
 let draft = null;
 let nav = {v:'home'};
 const signed = new Map(); // path -> url
@@ -422,20 +437,25 @@ async function signUrls(paths){
 /* ============ NẠP DỮ LIỆU ============ */
 async function loadAll(){
   busy(true);
-  const [ro, ci, ii, ex, sl, si, lv] = await Promise.all([
+  const [ro, ci, ii, ex, sl, si, lv, tb, tr] = await Promise.all([
     sb.from('room_overview').select('*').order('building_sort').order('sort'),
     sb.from('checklist').select('*').order('area_sort').order('item_sort'),
     sb.from('issues').select('*').is('resolved_at', null).order('created_at', {ascending:false}),
     sb.from('checklist_exclusions').select('*'),
     sb.from('stock_locations').select('*').order('kind').order('sort'),
     sb.from('stock_items').select('*').eq('active', true).order('sort'),
-    sb.from('stock_levels').select('*')
+    sb.from('stock_levels').select('*'),
+    sb.from('buildings').select('id, name, deleted_at, deleted_by_name').not('deleted_at', 'is', null),
+    sb.from('rooms').select('id, name, building_id, is_common, deleted_at, deleted_by_name').not('deleted_at', 'is', null)
   ]);
   busy(false);
   const err = ro.error || ci.error || ii.error;
   if(err){ toast(t('errLoad') + err.message); return false }
   rooms = ro.data || [];
-  openIssues = ii.data || [];
+  // Chưa chạy supabase-buoc6.sql thì thiếu cột deleted_at: coi như thùng rác trống
+  trash = {b: tb.error ? [] : (tb.data||[]), r: tr.error ? [] : (tr.data||[])};
+  const live = new Set(rooms.map(r => r.id));
+  openIssues = (ii.data || []).filter(x => live.has(x.room_id));
   const map = new Map();
   AJ.clear(); IJ.clear();
   (ci.data||[]).forEach(r => {
@@ -445,7 +465,8 @@ async function loadAll(){
   allItems = ci.data || [];
   if(ex.error || sl.error) toast(t('errTable'));
   exSet = new Set((ex.data||[]).map(e => e.room_id + '|' + e.checklist_id));
-  stLocs  = sl.data || [];
+  const deadB = new Set(trash.b.map(b => b.id));
+  stLocs  = (sl.data || []).filter(l => !deadB.has(l.building_id));
   stItems = si.data || [];
   stLv = new Map((lv.data||[]).map(r => [r.location_id + '|' + r.item_id, r]));
   checklist = group(allItems.filter(r => !r.common_only && !r.scope_room_id && !r.scope_building_id));
@@ -754,7 +775,8 @@ async function vHistory(){
           <span class="dot" style="margin-top:6px"></span>
           <span class="main"><span class="t1" style="white-space:normal">${esc(itemName(x.item))}</span>
           <span class="t2" style="white-space:normal">${esc(areaName(x.area))}${x.note?' · '+esc(x.note):''}</span>
-          ${x.photos?.length?`<span class="thumbs" data-photos="${esc(x.photos.join('|'))}"></span>`:''}</span>
+          ${x.photos?.length?`<span class="thumbs" data-photos="${esc(x.photos.join('|'))}"></span>`:''}
+          ${x.archived_photos?.length?`<span class="t2">📁 ${t('onDrive', x.archived_photos.length)}</span>`:''}</span>
           <span class="tag">${x.resolved_at ? t('doneTag') : ss(x.status)}</span></div>`).join('')
         : `<div class="muted">${t('noIssue')}</div>`}
     </div>`;
@@ -932,6 +954,7 @@ function vSetup(){
       <input type="number" id="cy" min="1" value="${rooms[0]?.cycle_days ?? 7}"></label>
     <button class="btn ghost" id="setcy">${t('applyAll')}</button>
   </div>` : ''}
+  ${me.admin ? `<div class="card" id="bkup" hidden><div class="eyebrow">${t('backupTitle')}</div><div id="bkupBody"></div></div>` : ''}
   <div class="card"><div class="eyebrow">${t('language')}</div><div class="pillrow"><button class="pill ${lang==='vi'?'on':''}" data-lang="vi">Tiếng Việt</button><button class="pill ${lang==='ja'?'on':''}" data-lang="ja">日本語</button></div></div><button class="btn danger" id="out">${t('logout')}</button>
   <p class="muted" style="text-align:center;font-size:12px;margin-top:12px">
     ${t('footer')}</p>
@@ -944,6 +967,7 @@ function vSetup(){
   };
   bindAll('[data-lang]', b => setLang(b.dataset.lang));
   if(me.admin) $('#adm').onclick = () => go('admin');
+  if(me.admin) paintBackup();
   $('#nm').onchange = async e => {
     const name = e.target.value.trim(); if(!name) return;
     await sb.from('profiles').update({name}).eq('id', me.id);
@@ -964,6 +988,31 @@ function vSetup(){
   };
 }
 
+async function paintBackup(){
+  const {data:s, error} = await sb.rpc('archive_status');
+  const el = $('#bkup');
+  if(error || !s || !el) return;   // chưa chạy supabase-buoc6.sql
+  const lines = [];
+  if(s.total != null){
+    const mb = s.bytes / 1048576;
+    lines.push(t('backupUsage', s.total, mb < 1000 ? mb.toFixed(1) + ' MB' : (mb/1024).toFixed(2) + ' GB'));
+    if(mb > 800) lines.push(`<b style="color:var(--replace)">${t('backupFull')}</b>`);
+  }
+  if(s.enabled === false){
+    lines.push(t('backupOff'));
+    $('#bkupBody').innerHTML = lines.map(l => `<div class="muted" style="margin-top:4px">${l}</div>`).join('');
+    el.hidden = false;
+    return;
+  }
+  if(s.archived) lines.push(t('backupDone', s.archived), t('backupLast', dstr(s.last_at)));
+  else lines.push(t('backupNone'));
+  if(s.pending) lines.push(`<b style="color:var(--replace)">${t('backupPending', s.pending)}</b> · ${t('backupSafe')}`);
+  if(s.err && (!s.last_at || new Date(s.err_at) > new Date(s.last_at)))
+    lines.push(`<span style="color:var(--replace)">${t('backupErr', esc(s.err))}</span>`);
+  $('#bkupBody').innerHTML = lines.map(l => `<div class="muted" style="margin-top:4px">${l}</div>`).join('');
+  el.hidden = false;
+}
+
 /* ============ QUẢN LÝ TOÀ NHÀ & PHÒNG (chỉ admin) ============ */
 function parseRooms(s){
   const out=[];
@@ -977,6 +1026,24 @@ function parseRooms(s){
     out.push(p);
   });
   return [...new Set(out)];
+}
+// Phòng lẻ bị xoá chỉ hiện khi toà nhà của nó còn hoạt động;
+// phòng thuộc toà đã xoá được khôi phục cùng toà.
+function trashCard(){
+  const deadB = new Set(trash.b.map(b => b.id));
+  const bName = new Map(rooms.map(r => [r.building_id, r.building_name]));
+  const left = d => Math.max(0, 30 - daysSince(d));
+  const list = [
+    ...trash.b.map(b => ({k:'b', id:b.id, t1:b.name, t2:t('trashBuilding'), at:b.deleted_at, by:b.deleted_by_name})),
+    ...trash.r.filter(r => !deadB.has(r.building_id)).map(r => ({k:'r', id:r.id,
+      t1:(bName.get(r.building_id)||'') + ' · ' + (r.is_common ? t('commonArea') : r.name),
+      t2:'', at:r.deleted_at, by:r.deleted_by_name}))
+  ].sort((a,b) => new Date(b.at) - new Date(a.at));
+  if(!list.length) return '';
+  return `<div class="card"><div class="eyebrow">${t('trash')}</div>${list.map(x => `<div class="row">
+      <span class="main"><span class="t1">${esc(x.t1)}</span>
+      <span class="t2">${[x.t2, t('trashLeft', left(x.at)), x.by ? t('trashBy', esc(x.by)) : ''].filter(Boolean).join(' · ')}</span></span>
+      <button class="pill" data-restore="${x.k}|${x.id}">${t('restore')}</button></div>`).join('')}</div>`;
 }
 function vAdmin(){
   if(!me.admin) return go('setup');
@@ -1004,6 +1071,7 @@ function vAdmin(){
       <button class="pill" data-addr="${bid}">${t('addRooms')}</button>
     </div>`;
   }).join('')}
+  ${trashCard()}
   <p class="muted" style="text-align:center;font-size:12px">${t('delWarn')}</p>`;
 
   $('#addb').onclick = async () => {
@@ -1048,10 +1116,20 @@ function vAdmin(){
     const n = rooms.filter(r => r.building_id === bid && !r.is_common).length;
     if(!confirm(t('delBuildingAsk', n))) return;
     busy(true);
-    const {error} = await sb.from('buildings').delete().eq('id', bid);
+    const {error} = await sb.from('buildings')
+      .update({deleted_at: new Date().toISOString(), deleted_by_name: me.name}).eq('id', bid);
     busy(false);
     if(error) return toast(t('err') + error.message);
     await loadAll(); toast(t('buildingDeleted')); render();
+  });
+  bindAll('[data-restore]', async b => {
+    const [kind, id] = b.dataset.restore.split('|');
+    busy(true);
+    const {error} = await sb.from(kind === 'b' ? 'buildings' : 'rooms')
+      .update({deleted_at: null, deleted_by_name: null}).eq('id', id);
+    busy(false);
+    if(error) return toast(t('err') + error.message);
+    await loadAll(); toast(t('restored')); render();
   });
   bindAll('[data-editr]', async b => {
     const r = rooms.find(x => x.id === b.dataset.editr); if(!r) return;
@@ -1059,8 +1137,12 @@ function vAdmin(){
     if(name === null) return;
     busy(true);
     if(!name.trim()){
-      if(confirm(t('delRoomAsk', r.name)))
-        await sb.from('rooms').delete().eq('id', r.id);
+      if(confirm(t('delRoomAsk', r.name))){
+        const {error} = await sb.from('rooms')
+          .update({deleted_at: new Date().toISOString(), deleted_by_name: me.name}).eq('id', r.id);
+        if(error){ busy(false); return toast(t('err') + error.message) }
+        toast(t('roomDeleted'));
+      }
     } else {
       const cy = prompt(t('askCycle'), r.cycle_days);
       await sb.from('rooms').update({
