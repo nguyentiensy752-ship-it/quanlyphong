@@ -154,7 +154,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = 'https://ukglohmssluajtkghpva.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ2xvaG1zc2x1YWp0a2docHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDgzNjksImV4cCI6MjEwMzIyNDM2OX0.5Fr7mOWEjDG0uz8VNbtWiof50IJnkCYjTe9BI2Ptkdw';
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-const APP_VERSION = 'v11 · 2026-10-29';
+const APP_VERSION = 'v12 · 2026-10-29';
 
 
 /* ============ NGÔN NGỮ / 言語 ============ */
@@ -212,7 +212,9 @@ const I18N = {
   editRoomTitle:'Phòng {0}', fRoomName:'Số / tên phòng', fCycle:'Chu kỳ kiểm tra (ngày)',
   delRoom:'Chuyển phòng vào thùng rác', needRoomName:'Nhập số / tên phòng',
   addItemRoomTitle:'Thêm hạng mục cho {0}', fArea:'Khu vực', fItemVi:'Tên hạng mục (tiếng Việt)',
-  fItemJa:'Tên tiếng Nhật', itemJaHint:'Bỏ trống thì người dùng tiếng Nhật sẽ thấy tên tiếng Việt.',
+  fItemJa:'Tên tiếng Nhật', jaAutoHint:'Tự dịch khi gõ xong tên tiếng Việt — sửa lại nếu chưa đúng.',
+  translating:'Đang dịch…', trBtn:'Dịch sang tiếng Nhật {0} mục còn thiếu', trDone:'Đã dịch {0} mục',
+  trFail:'Không dịch được — kiểm tra kết nối mạng', trAllDone:'Mọi mục đều đã có tên tiếng Nhật',
   needItemName:'Nhập tên hạng mục',
   roomDeleted:'Đã chuyển phòng vào thùng rác', trash:'Thùng rác', restore:'Khôi phục', restored:'Đã khôi phục',
   trashLeft:'Xoá hẳn sau {0} ngày', trashBy:'Xoá bởi {0}', trashBuilding:'Cả toà nhà',
@@ -229,7 +231,7 @@ const I18N = {
   navHome:'Tổng quan', navRooms:'Phòng', navTasks:'Việc', navStock:'Kho', navSetup:'Cài đặt',
   stock:'Kho đồ dùng', warehouses:'Kho chính', cabinets:'Tủ tại toà nhà',
   save:'Lưu', addItemTitle:'Thêm mặt hàng vào {0}',
-  fName:'Tên mặt hàng', fUnit:'Đơn vị', fQty:'Số lượng', fMin:'Ngưỡng cảnh báo sắp hết',
+  fName:'Tên mặt hàng', fNameJa:'Tên tiếng Nhật', fUnit:'Đơn vị', fQty:'Số lượng', fMin:'Ngưỡng cảnh báo sắp hết',
   minHintLoc:'Để trống = dùng ngưỡng chung ({0}). Nhập 0 = không cảnh báo.',
   minHintG:'0 = không cảnh báo.',
   fromCatalog:'Có sẵn trong danh mục — bấm để điền nhanh',
@@ -318,7 +320,9 @@ const I18N = {
   editRoomTitle:'{0}号室', fRoomName:'部屋番号・名前', fCycle:'点検周期（日）',
   delRoom:'客室をゴミ箱に移す', needRoomName:'部屋番号を入力してください',
   addItemRoomTitle:'{0}に項目を追加', fArea:'エリア', fItemVi:'項目名（ベトナム語）',
-  fItemJa:'項目名（日本語）', itemJaHint:'日本語を空欄にすると、日本語表示でもベトナム語名が表示されます。',
+  fItemJa:'項目名（日本語）', jaAutoHint:'ベトナム語名を入力すると自動翻訳されます。必要に応じて修正してください。',
+  translating:'翻訳中…', trBtn:'日本語名がない{0}件を翻訳', trDone:'{0}件を翻訳しました',
+  trFail:'翻訳できませんでした。通信状況を確認してください', trAllDone:'すべての項目に日本語名があります',
   needItemName:'項目名を入力してください',
   roomDeleted:'客室をゴミ箱に移しました', trash:'ゴミ箱', restore:'復元', restored:'復元しました',
   trashLeft:'あと{0}日で完全削除', trashBy:'削除者: {0}', trashBuilding:'建物全体',
@@ -335,7 +339,7 @@ const I18N = {
   navHome:'概要', navRooms:'客室', navTasks:'タスク', navStock:'在庫', navSetup:'設定',
   stock:'備品在庫', warehouses:'倉庫', cabinets:'建物の備品棚',
   save:'保存', addItemTitle:'{0}に品目を追加',
-  fName:'品目名', fUnit:'単位', fQty:'数量', fMin:'残少アラートのしきい値',
+  fName:'品目名', fNameJa:'品目名（日本語）', fUnit:'単位', fQty:'数量', fMin:'残少アラートのしきい値',
   minHintLoc:'空欄＝共通しきい値（{0}）を使用。0＝アラートなし。',
   minHintG:'0＝アラートなし。',
   fromCatalog:'マスタにある品目 — タップで入力',
@@ -968,6 +972,7 @@ function vSetup(){
         <span class="t2">${t('commonCount', rooms.filter(r=>r.is_common).length)} · ${t('buildingsN', new Set(rooms.map(r=>r.building_id)).size)}</span></span></div>`}
     <div class="row"><span class="main"><span class="t1">${t('itemsCount', items)}</span>
       <span class="t2">${t('areasN', checklist.length)}</span></span></div>
+    ${me.admin && missingJa().length ? `<button class="btn ghost" id="trja" style="margin-top:10px">${t('trBtn', missingJa().length)}</button>` : ''}
     ${me.admin ? '' : `<p class="muted" style="margin:10px 0 0">${t('adminOnly')}</p>`}
   </div>
   ${me.admin ? `<div class="card">
@@ -989,6 +994,7 @@ function vSetup(){
   };
   bindAll('[data-lang]', b => setLang(b.dataset.lang));
   if(me.admin) $('#adm').onclick = () => go('admin');
+  if($('#trja')) $('#trja').onclick = fillMissingJa;
   if(me.admin) paintBackup();
   $('#nm').onchange = async e => {
     const name = e.target.value.trim(); if(!name) return;
@@ -1246,9 +1252,10 @@ function vItems(){
         <input type="text" id="s_item" autocapitalize="sentences"></label>
       <label class="f"><span>${t('fItemJa')}</span>
         <input type="text" id="s_item_ja"></label>
-      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('itemJaHint')}</p>`,
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('jaAutoHint')}</p>`,
     async () => {
-      const vi = $('#s_item').value.trim(), ja = $('#s_item_ja').value.trim();
+      const vi = $('#s_item').value.trim();
+      const ja = $('#s_item_ja').value.trim() || await autoTr(vi);
       if(!vi && !ja) return toast(t('needItemName'));
       const area = $('#s_area').value;
       const sameArea = all.filter(i => i.area === area);
@@ -1264,8 +1271,62 @@ function vItems(){
       if(error) return toast(t('err') + error.message);
       closeSheet(); await loadAll(); toast(t('itemAdded')); render();
     });
+    linkJa('s_item', 's_item_ja');
     $('#s_item').focus();
   };
+}
+
+/* ============ DỊCH TỰ ĐỘNG ============ */
+// Dịch tên mặt hàng / hạng mục một lần lúc lưu và ghi vào cột _ja, nên đổi ngôn ngữ
+// không gọi dịch lại. Dịch vụ miễn phí của Google, không cần key; lỗi mạng thì trả ''
+// và người dùng tự gõ. Thêm ngôn ngữ khác sau này: đổi tham số tl (vd 'zh-CN').
+const UNIT_JA = {'cái':'個', 'chai':'本', 'bịch':'袋', 'cuộn':'ロール', 'hộp':'箱',
+                 'gói':'袋', 'túi':'袋', 'thùng':'箱', 'bộ':'セット', 'kg':'kg'};
+async function autoTr(text, tl='ja'){
+  if(!text) return '';
+  try{
+    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl='
+      + tl + '&dt=t&q=' + encodeURIComponent(text));
+    if(!r.ok) return '';
+    const j = await r.json();
+    return (j[0] || []).map(x => x[0]).join('').trim();
+  }catch{ return '' }
+}
+const unitJa = async u => UNIT_JA[u.toLowerCase()] || await autoTr(u);
+// Rời ô tiếng Việt thì tự điền ô tiếng Nhật, trừ khi người dùng đã tự gõ vào đó.
+function linkJa(viId, jaId){
+  const vi = $('#'+viId), ja = $('#'+jaId);
+  ja.oninput = () => { ja.dataset.auto = '' };
+  vi.onchange = async () => {
+    if(ja.value && !ja.dataset.auto) return;
+    const v = vi.value.trim();
+    ja.placeholder = t('translating');
+    const out = await autoTr(v);
+    ja.placeholder = '';
+    if(vi.value.trim() === v && (!ja.value || ja.dataset.auto)){ ja.value = out; ja.dataset.auto = out ? '1' : '' }
+  };
+}
+// Dịch bù các mặt hàng / hạng mục đã thêm trước đây mà chưa có tên tiếng Nhật
+const missingJa = () => [
+  ...stItems.filter(i => !i.name_ja || !i.unit_ja).map(i => ({k:'s', r:i})),
+  ...allItems.filter(i => !i.item_ja).map(i => ({k:'c', r:i}))
+];
+async function fillMissingJa(){
+  const list = missingJa();
+  if(!list.length) return toast(t('trAllDone'));
+  busy(true);
+  let n = 0;
+  for(const {k, r} of list){
+    const ja = k === 's' ? (r.name_ja || await autoTr(r.name)) : await autoTr(r.item);
+    if(!ja) continue;   // lỗi mạng: để lần sau dịch lại
+    const res = k === 's'
+      ? await sb.from('stock_items').update({name_ja: ja, unit_ja: r.unit_ja || await unitJa(r.unit) || null}).eq('id', r.id)
+      : await sb.from('checklist').update({item_ja: ja}).eq('id', r.id);
+    if(!res.error) n++;
+  }
+  busy(false);
+  await loadAll(); render();
+  toast(n ? t('trDone', n) : t('trFail'));
 }
 
 /* ============ BẢNG NHẬP ============ */
@@ -1442,6 +1503,7 @@ function vStockLoc(){
         busy(true);
         const ins = await sb.from('stock_items').insert({
           name, unit, min_qty:minQ,
+          name_ja: await autoTr(name) || null, unit_ja: await unitJa(unit) || null,
           sort:(stItems[stItems.length-1]?.sort ?? 0) + 1}).select().single();
         busy(false);
         if(ins.error) return toast(t('err') + ins.error.message);
@@ -1566,6 +1628,9 @@ function vStockItems(){
     sheet(cur ? itName(cur) : t('newItem').replace('＋ ', ''), `
       <label class="f"><span>${t('fName')}</span>
         <input type="text" id="i_name" value="${cur ? esc(cur.name) : ''}"></label>
+      <label class="f"><span>${t('fNameJa')}</span>
+        <input type="text" id="i_name_ja" value="${cur ? esc(cur.name_ja || '') : ''}"></label>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('jaAutoHint')}</p>
       <label class="f"><span>${t('fUnit')}</span>
         <input type="text" id="i_unit" value="${cur ? esc(cur.unit) : 'cái'}"></label>
       ${unitPills('i_unit')}
@@ -1576,9 +1641,11 @@ function vStockItems(){
     async () => {
       const name = $('#i_name').value.trim();
       if(!name) return toast(t('nameNeeded'));
-      const row = {name, unit:$('#i_unit').value.trim() || 'cái',
-                   min_qty:Math.max(0, parseInt($('#i_min').value) || 0)};
+      const unit = $('#i_unit').value.trim() || 'cái';
       busy(true);
+      const row = {name, unit, min_qty:Math.max(0, parseInt($('#i_min').value) || 0),
+                   name_ja: $('#i_name_ja').value.trim() || await autoTr(name) || null,
+                   unit_ja: cur && cur.unit === unit && cur.unit_ja ? cur.unit_ja : (await unitJa(unit) || null)};
       const {error} = cur
         ? await sb.from('stock_items').update(row).eq('id', cur.id)
         : await sb.from('stock_items').insert({...row, sort:(stItems[stItems.length-1]?.sort ?? 0) + 1});
@@ -1587,6 +1654,7 @@ function vStockItems(){
       await loadAll(); closeSheet(); toast(t('itemSaved')); render();
     });
     bindUnitPills();
+    linkJa('i_name', 'i_name_ja');
     if(cur) $('#i_del').onclick = async () => {
       if(!confirm(t('delItemAsk', itName(cur)))) return;
       busy(true);

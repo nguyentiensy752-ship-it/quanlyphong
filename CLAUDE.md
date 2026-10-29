@@ -101,6 +101,9 @@ Ranh giới bảo mật thật nằm ở `to authenticated` trong RLS — ngư�
 **Song ngữ Việt / Nhật.** Đối tượng `I18N` trong app, lựa chọn lưu ở `localStorage['ra_lang']`.
 Tên hạng mục và mặt hàng có cột `_ja` riêng trong database.
 Thêm hạng mục mới mà quên `item_ja` thì người dùng tiếng Nhật sẽ thấy tiếng Việt.
+Vì vậy app tự dịch lúc lưu (hàm `autoTr`, dịch vụ miễn phí `translate.googleapis.com`,
+không cần key) và ghi vào cột `_ja`; người dùng sửa lại được. Cài đặt có nút dịch bù cho
+mục còn thiếu. Dịch vụ này không chính thức — nếu nó ngừng, ô tiếng Nhật chỉ để trống.
 
 ---
 
