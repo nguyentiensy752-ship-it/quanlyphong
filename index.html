@@ -47,7 +47,7 @@ h1,h2{margin:0;font-weight:650;letter-spacing:-.02em}
 .btn.danger{background:#fff;color:var(--replace);border:1px solid #E3BDB2}
 .btn:active{opacity:.72}
 .btn[disabled]{opacity:.4}
-input[type=text],input[type=number],input[type=email],input[type=password]{width:100%;background:#fff;
+input[type=text],input[type=number],input[type=email],input[type=password],select{width:100%;background:#fff;
   border:1px solid var(--line);border-radius:9px;padding:10px 11px;font-size:16px}
 label.f{display:block;margin-bottom:11px}
 label.f span{display:block;font-size:12.5px;font-weight:650;color:var(--ink-2);margin-bottom:5px}
@@ -154,7 +154,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = 'https://ukglohmssluajtkghpva.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ2xvaG1zc2x1YWp0a2docHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDgzNjksImV4cCI6MjEwMzIyNDM2OX0.5Fr7mOWEjDG0uz8VNbtWiof50IJnkCYjTe9BI2Ptkdw';
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-const APP_VERSION = 'v9 · 2026-10-28';
+const APP_VERSION = 'v10 · 2026-10-29';
 
 
 /* ============ NGÔN NGỮ / 言語 ============ */
@@ -234,6 +234,11 @@ const I18N = {
   delFromCatalog:'Xoá khỏi danh mục',
   itemsHere:'{0} mặt hàng', lowN:'{0} sắp hết', lowStock:'Sắp hết', outStock:'Hết hàng',
   noStock:'Chưa có mặt hàng nào ở đây', noStockHint:'Bấm nút bên dưới để thêm.',
+  stockLog:'Lịch sử xuất nhập', stockLogBtn:'Lịch sử xuất nhập kho',
+  logAllLocs:'Mọi kho / tủ', logAllItems:'Mọi mặt hàng', logDays:'{0} ngày',
+  logSum:'Tổng {0} ngày qua', logSumLine:'Nhập +{0} · Xuất −{1}', leftQty:'còn {0}', tapsN:'{0} lần bấm',
+  logEmpty:'Chưa có lượt xuất nhập nào', logEmptyHint:'Thử chọn khoảng thời gian dài hơn hoặc bỏ bớt bộ lọc.',
+  logMax:'Chỉ hiện {0} lượt gần nhất. Thu hẹp bộ lọc để xem đủ.',
   addStockItem:'＋ Thêm mặt hàng vào nơi này', pickItem:'Chọn mặt hàng:',
   setQty:'Số lượng ({0}):', qtySaved:'Đã cập nhật số lượng',
   manageItems:'Danh mục mặt hàng', manageItemsHint:'Mặt hàng dùng chung cho mọi kho và tủ.',
@@ -329,6 +334,11 @@ const I18N = {
   delFromCatalog:'マスタから削除',
   itemsHere:'{0}品目', lowN:'{0}品目が残少', lowStock:'残少', outStock:'在庫切れ',
   noStock:'ここには品目がありません', noStockHint:'下のボタンから追加してください。',
+  stockLog:'入出庫履歴', stockLogBtn:'入出庫履歴',
+  logAllLocs:'すべての倉庫・棚', logAllItems:'すべての品目', logDays:'{0}日間',
+  logSum:'過去{0}日間の合計', logSumLine:'入庫 +{0} · 出庫 −{1}', leftQty:'残り{0}', tapsN:'{0}回操作',
+  logEmpty:'入出庫の記録がありません', logEmptyHint:'期間を長くするか、絞り込みを減らしてください。',
+  logMax:'直近{0}件のみ表示しています。絞り込むとすべて表示されます。',
   addStockItem:'＋ この場所に品目を追加', pickItem:'品目を選択:',
   setQty:'数量（{0}）:', qtySaved:'数量を更新しました',
   manageItems:'品目マスタ', manageItemsHint:'すべての倉庫・棚で共通の品目です。',
@@ -509,7 +519,7 @@ function render(){
   document.querySelectorAll('.sticky').forEach(e=>e.remove());
   const views={login:vLogin, home:vHome, rooms:vRooms, room:vRoom, inspect:vInspect,
                tasks:vTasks, setup:vSetup, history:vHistory, admin:vAdmin, items:vItems,
-               stock:vStock, stockLoc:vStockLoc, stockItems:vStockItems};
+               stock:vStock, stockLoc:vStockLoc, stockItems:vStockItems, stockLog:vStockLog};
   (views[nav.v]||vHome)();
   const hide = (nav.v==='login');
   $('#tabs').classList.toggle('hide', hide);
@@ -1263,8 +1273,10 @@ function vStock(){
     }).join('')}</div>`;
   };
   $('#view').innerHTML = sect('warehouse', t('warehouses')) + sect('cabinet', t('cabinets'))
+    + `<button class="btn ghost" id="log" style="margin-bottom:10px">${t('stockLogBtn')}</button>`
     + (me.admin ? `<button class="btn ghost" id="mi">${t('manageItems')}</button>` : '');
   bindAll('[data-loc]', b => go('stockLoc', {id:b.dataset.loc}));
+  $('#log').onclick = () => go('stockLog');
   if(me.admin) $('#mi').onclick = () => go('stockItems');
 }
 function vStockLoc(){
@@ -1288,7 +1300,9 @@ function vStockLoc(){
         </span></div>`;
     }).join('')}</div>`
     : `<div class="card"><div class="empty"><b>${t('noStock')}</b>${t('noStockHint')}</div></div>`)
-    + `<button class="btn ghost" id="add">${t('addStockItem')}</button>`;
+    + `<button class="btn ghost" id="add" style="margin-bottom:10px">${t('addStockItem')}</button>`
+    + `<button class="btn ghost" id="log">${t('stockLogBtn')}</button>`;
+  $('#log').onclick = () => go('stockLog', {loc:l.id, back:l.id});
 
   const save = async (item, qty, delta, minL) => {
     qty = Math.max(0, qty);
@@ -1297,9 +1311,11 @@ function vStockLoc(){
     const now = new Date().toISOString();
     const row = {location_id:l.id, item_id:item.id, qty, updated_at:now, updated_by_name:me.name};
     if(minL !== undefined) row.min_qty = minL;
+    // Bấm − khi đã về 0, hay chỉ đổi ngưỡng: số lượng không đổi thì không ghi lịch sử
+    const real = prev.qty != null ? qty - prev.qty : delta;
     const r1 = await sb.from('stock_levels').upsert(row);
-    if(!r1.error) await sb.from('stock_moves').insert({
-      location_id:l.id, item_id:item.id, delta, qty_after:qty, created_by_name:me.name});
+    if(!r1.error && real) await sb.from('stock_moves').insert({
+      location_id:l.id, item_id:item.id, delta:real, qty_after:qty, created_by_name:me.name});
     busy(false);
     if(r1.error) return toast(t('err') + r1.error.message);
     stLv.set(l.id + '|' + item.id, {location_id:l.id, item_id:item.id, qty,
@@ -1386,6 +1402,99 @@ function vStockLoc(){
       $('#a_min').value = i.min_qty || 0;
     });
   };
+}
+/* ============ LỊCH SỬ XUẤT NHẬP KHO ============ */
+const LOG_MAX = 1000;
+// Các lần bấm +/− liên tiếp của cùng người, cùng mặt hàng, cùng nơi, cùng chiều,
+// cách nhau dưới 10 phút được gộp thành một dòng. list: mới nhất trước.
+function mergeMoves(list){
+  const out = [];
+  for(const m of list){
+    const p = out[out.length-1];
+    if(p && p.location_id === m.location_id && p.item_id === m.item_id
+       && p.created_by_name === m.created_by_name && Math.sign(p.delta) === Math.sign(m.delta)
+       && new Date(p.first) - new Date(m.created_at) < 6e5){
+      p.delta += m.delta; p.first = m.created_at; p.n++;
+    } else out.push({...m, first:m.created_at, n:1});
+  }
+  return out;
+}
+async function vStockLog(){
+  const cur = nav, days = nav.days || 30;
+  const l = nav.loc ? stLocs.find(x => x.id === nav.loc) : null;
+  head(t('stockLog'), t('back'), () => cur.back ? go('stockLoc', {id:cur.back}) : go('stock'));
+  const refilter = p => go('stockLog', {loc:cur.loc, item:cur.item, days, back:cur.back, ...p});
+  const filters = `<div class="card">
+    <div class="pillrow" style="margin-bottom:10px">${[7,30,90].map(d =>
+      `<button class="pill ${d===days?'on':''}" data-days="${d}">${t('logDays', d)}</button>`).join('')}</div>
+    <label class="f"><select id="lg_loc"><option value="">${t('logAllLocs')}</option>${stLocs.map(x =>
+      `<option value="${x.id}"${x.id===cur.loc?' selected':''}>${esc(locName(x))}</option>`).join('')}</select></label>
+    <label class="f" style="margin:0"><select id="lg_item"><option value="">${t('logAllItems')}</option>${stItems.map(i =>
+      `<option value="${i.id}"${i.id===cur.item?' selected':''}>${esc(itName(i))}</option>`).join('')}</select></label>
+  </div>`;
+  const bindFilters = () => {
+    bindAll('[data-days]', b => refilter({days:+b.dataset.days}));
+    $('#lg_loc').onchange  = e => refilter({loc:e.target.value || undefined});
+    $('#lg_item').onchange = e => refilter({item:e.target.value || undefined});
+  };
+  $('#view').innerHTML = filters + `<div class="card"><div class="empty">${t('loading')}</div></div>`;
+  bindFilters();
+
+  let q = sb.from('stock_moves').select('*, stock_items(name, name_ja, unit, unit_ja)')
+    .neq('delta', 0).gte('created_at', new Date(Date.now() - days*864e5).toISOString())
+    .order('created_at', {ascending:false}).limit(LOG_MAX);
+  if(cur.loc)  q = q.eq('location_id', cur.loc);
+  if(cur.item) q = q.eq('item_id', cur.item);
+  const {data, error} = await q;
+  if(nav !== cur) return;   // đã chuyển màn trong lúc tải
+  if(error){
+    $('#view').innerHTML = filters + `<div class="card"><div class="empty">${esc(t('errLoad') + error.message)}</div></div>`;
+    return bindFilters();
+  }
+  const locs = new Map(stLocs.map(x => [x.id, x]));   // bỏ tủ của toà đang trong thùng rác
+  const raw = (data||[]).filter(m => locs.has(m.location_id));
+  if(!raw.length){
+    $('#view').innerHTML = filters + `<div class="card"><div class="empty"><b>${t('logEmpty')}</b>${t('logEmptyHint')}</div></div>`;
+    return bindFilters();
+  }
+
+  const iName = m => m.stock_items ? itName(m.stock_items) : '—';
+  const uName = m => m.stock_items ? unitName(m.stock_items) : '';
+  const sum = new Map();
+  raw.forEach(m => {
+    const k = m.item_id, s = sum.get(k) || {m, inQ:0, outQ:0};
+    if(m.delta > 0) s.inQ += m.delta; else s.outQ -= m.delta;
+    sum.set(k, s);
+  });
+  const sumCard = `<div class="card"><div class="eyebrow">${t('logSum', days)}${l ? ' · ' + esc(locName(l)) : ''}</div>
+    ${[...sum.values()].sort((a,b) => b.outQ - a.outQ || b.inQ - a.inQ).map(s => `<div class="row">
+      <span class="main"><span class="t1">${esc(iName(s.m))}</span></span>
+      <span class="t2" style="flex:none;font-variant-numeric:tabular-nums">${t('logSumLine', s.inQ, s.outQ)} ${esc(uName(s.m))}</span></div>`).join('')}</div>`;
+
+  const dayKey = v => new Date(v).toDateString();
+  const dayHead = v => new Date(v).toLocaleDateString(lang==='ja' ? 'ja-JP' : 'vi-VN',
+    {weekday:'short', day:'numeric', month:'numeric'});
+  const hm = v => new Date(v).toLocaleTimeString(lang==='ja' ? 'ja-JP' : 'vi-VN', {hour:'2-digit', minute:'2-digit'});
+  const groups = [];
+  mergeMoves(raw).forEach(m => {
+    const g = groups[groups.length-1];
+    if(g && g.k === dayKey(m.created_at)) g.list.push(m);
+    else groups.push({k:dayKey(m.created_at), at:m.created_at, list:[m]});
+  });
+  const listHtml = groups.map(g => `<div class="card" style="padding-bottom:4px">
+    <div class="eyebrow">${esc(dayHead(g.at))}</div>
+    ${g.list.map(m => `<div class="row st-${m.delta > 0 ? 'ok' : 'replace'}">
+      <span class="dot"></span>
+      <span class="main"><span class="t1">${esc(iName(m))}</span>
+        <span class="t2">${cur.loc ? '' : esc(locName(locs.get(m.location_id))) + ' · '}${esc(m.created_by_name || '—')} · ${hm(m.created_at)}${m.n > 1 ? ' · ' + t('tapsN', m.n) : ''}</span></span>
+      <span style="flex:none;text-align:right">
+        <b style="color:var(--c);font-variant-numeric:tabular-nums">${m.delta > 0 ? '+' : '−'}${Math.abs(m.delta)} ${esc(uName(m))}</b>
+        <span class="muted" style="display:block;font-size:12px">${t('leftQty', m.qty_after)}</span></span>
+    </div>`).join('')}</div>`).join('');
+
+  $('#view').innerHTML = filters + sumCard + listHtml
+    + (data.length >= LOG_MAX ? `<p class="muted" style="text-align:center;font-size:12px">${t('logMax', LOG_MAX)}</p>` : '');
+  bindFilters();
 }
 function vStockItems(){
   if(!me.admin) return go('stock');

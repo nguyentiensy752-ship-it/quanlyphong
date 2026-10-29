@@ -108,7 +108,8 @@ Thêm hạng mục mới mà quên `item_ja` thì người dùng tiếng Nhật 
 
 - Kiểm tra phòng **không tự trừ kho**. Đánh dấu "Bổ sung" ở phòng không làm giảm số lượng
   ở kho. Cố ý tách rời để quy trình đơn giản và tránh sai số.
-- **Chưa có màn hình xem lịch sử xuất nhập kho**, dù dữ liệu đã ghi đủ trong `stock_moves`.
+- Lịch sử xuất nhập kho (màn `stockLog`) đọc tối đa 1000 dòng `stock_moves` mỗi lần, trong 7/30/90 ngày.
+  Các lần bấm +/− liên tiếp (cùng người, mặt hàng, nơi, chiều, cách nhau < 10 phút) được gộp một dòng.
 - **Google Drive CHƯA được cài** (quyết định 2026-10-28: số ảnh còn ít). Lịch `archive-photos-drive`
   đang tắt, nên không ảnh nào bị xoá và dung lượng Supabase tăng dần (gói miễn phí 1GB).
   Màn Cài đặt hiện dung lượng và cảnh báo khi vượt 800MB. Khi bật Drive, ảnh cũ chỉ còn trên
