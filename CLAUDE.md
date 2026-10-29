@@ -192,3 +192,4 @@ Chạy theo đúng thứ tự này trên một database trống. Database hiện
 | `supabase-buoc6.sql` | Thùng rác 30 ngày, sổ sao lưu ảnh, cron gọi Edge Function, chỉ xoá ảnh đã lên Drive |
 | `supabase-buoc7.sql` | Tạm tắt lịch sao lưu Drive (chưa cài), Cài đặt hiện dung lượng ảnh. Bật lại: chạy lại bước 6 |
 | `supabase-buoc8.sql` | Trigger: toà mới tự có tủ kho + 共用部; đổi tên toà thì đổi tên tủ; bù cho toà đang thiếu |
+| `supabase-buoc9.sql` | Thêm kho chính "Kho công ty tổng" (本社倉庫), đứng đầu nhóm kho chính |
