@@ -118,8 +118,8 @@ Thêm hạng mục mới mà quên `item_ja` thì người dùng tiếng Nhật 
   trên Drive vẫn còn.
 - Thùng rác chỉ có cho toà nhà và phòng; xoá hạng mục, mặt hàng, ảnh vẫn là xoá ngay.
 - Lịch sử kiểm tra hiển thị tối đa 30 lượt gần nhất mỗi phòng.
-- Một số hộp thoại trong phần quản lý phòng và hạng mục vẫn dùng `prompt()` — nên thay dần
-  bằng bảng nhập (hàm `sheet()` đã có sẵn trong app).
+- Xác nhận xoá vẫn dùng `confirm()` của trình duyệt (mọi ô nhập liệu đã chuyển sang `sheet()`;
+  đừng thêm `prompt()` mới).
 - Ngưỡng cảnh báo chung hiện đặt theo quy mô kho lớn, nên tủ nhỏ ở các toà nhà dễ báo
   "Sắp hết" liên tục cho tới khi đặt ngưỡng riêng.
 

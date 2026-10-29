@@ -154,7 +154,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const SUPABASE_URL = 'https://ukglohmssluajtkghpva.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVrZ2xvaG1zc2x1YWp0a2docHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc2NDgzNjksImV4cCI6MjEwMzIyNDM2OX0.5Fr7mOWEjDG0uz8VNbtWiof50IJnkCYjTe9BI2Ptkdw';
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-const APP_VERSION = 'v10 · 2026-10-29';
+const APP_VERSION = 'v11 · 2026-10-29';
 
 
 /* ============ NGÔN NGỮ / 言語 ============ */
@@ -204,10 +204,16 @@ const I18N = {
   addBuildingBtn:'Thêm toà nhà', rename:'Đổi tên', del:'Xoá',
   addRooms:'＋ Thêm phòng vào toà này', delWarn:'Toà nhà / phòng bị xoá nằm trong thùng rác 30 ngày, khôi phục được trong thời gian đó.',
   needName:'Nhập tên toà nhà', needRooms:'Nhập ít nhất một phòng, vd: 101-110',
-  roomsAdded:'Đã thêm {0} phòng', askRooms:'Danh sách phòng cần thêm (vd: 401-408):',
-  askBuildingName:'Tên toà nhà:', delBuildingAsk:'Chuyển toà nhà này cùng {0} phòng vào thùng rác? Khôi phục được trong 30 ngày, sau đó xoá hẳn.',
-  buildingDeleted:'Đã chuyển toà nhà vào thùng rác', askRoomName:'Số / tên phòng (để trống rồi OK để xoá phòng):',
-  askCycle:'Chu kỳ kiểm tra (ngày):', delRoomAsk:'Chuyển phòng {0} vào thùng rác? Khôi phục được trong 30 ngày.',
+  roomsAdded:'Đã thêm {0} phòng',
+  delBuildingAsk:'Chuyển toà nhà này cùng {0} phòng vào thùng rác? Khôi phục được trong 30 ngày, sau đó xoá hẳn.',
+  buildingDeleted:'Đã chuyển toà nhà vào thùng rác',
+  delRoomAsk:'Chuyển phòng {0} vào thùng rác? Khôi phục được trong 30 ngày.',
+  renameBuilding:'Đổi tên toà nhà', addRoomsTitle:'Thêm phòng vào {0}', roomsPreview:'Sẽ thêm {0} phòng: {1}',
+  editRoomTitle:'Phòng {0}', fRoomName:'Số / tên phòng', fCycle:'Chu kỳ kiểm tra (ngày)',
+  delRoom:'Chuyển phòng vào thùng rác', needRoomName:'Nhập số / tên phòng',
+  addItemRoomTitle:'Thêm hạng mục cho {0}', fArea:'Khu vực', fItemVi:'Tên hạng mục (tiếng Việt)',
+  fItemJa:'Tên tiếng Nhật', itemJaHint:'Bỏ trống thì người dùng tiếng Nhật sẽ thấy tên tiếng Việt.',
+  needItemName:'Nhập tên hạng mục',
   roomDeleted:'Đã chuyển phòng vào thùng rác', trash:'Thùng rác', restore:'Khôi phục', restored:'Đã khôi phục',
   trashLeft:'Xoá hẳn sau {0} ngày', trashBy:'Xoá bởi {0}', trashBuilding:'Cả toà nhà',
   onDrive:'{0} ảnh đã chuyển sang Google Drive',
@@ -242,7 +248,7 @@ const I18N = {
   addStockItem:'＋ Thêm mặt hàng vào nơi này', pickItem:'Chọn mặt hàng:',
   setQty:'Số lượng ({0}):', qtySaved:'Đã cập nhật số lượng',
   manageItems:'Danh mục mặt hàng', manageItemsHint:'Mặt hàng dùng chung cho mọi kho và tủ.',
-  newItem:'＋ Thêm mặt hàng mới', askItemName:'Tên mặt hàng:', askUnit:'Đơn vị (cái, chai, bịch, cuộn…):',
+  newItem:'＋ Thêm mặt hàng mới',
   askMin:'Ngưỡng cảnh báo sắp hết (0 = không cảnh báo):', itemSaved:'Đã lưu mặt hàng',
   delItemAsk:'Xoá mặt hàng {0} khỏi danh mục? Số lượng ở mọi kho cũng mất.',
   unitOf:'Đơn vị: {0}', minOf:'Ngưỡng: {0}', stockHistory:'Lịch sử xuất nhập',
@@ -252,8 +258,8 @@ const I18N = {
   commonCount:'{0} khu vực chung', commonDueN:'{0} cần kiểm tra',
   editItems:'Điều chỉnh hạng mục kiểm tra', itemsFor:'Hạng mục · {0}',
   itemsHint:'Tắt hạng mục không có ở phòng này. Thay đổi chỉ áp dụng cho phòng này.',
-  addItem:'＋ Thêm hạng mục riêng cho phòng này', askArea:'Thuộc khu vực nào?',
-  askItem:'Tên hạng mục mới:', itemAdded:'Đã thêm hạng mục', itemOff:'Đã tắt hạng mục',
+  addItem:'＋ Thêm hạng mục riêng cho phòng này',
+  itemAdded:'Đã thêm hạng mục', itemOff:'Đã tắt hạng mục',
   itemOn:'Đã bật lại hạng mục', onlyThisRoom:'riêng phòng này', onlyThisBuilding:'riêng toà này',
   takePhoto:'Chụp ảnh', fromLibrary:'Chọn từ thư viện', activeItems:'{0}/{1} hạng mục đang bật',
   st_ok:'Tốt', st_clean:'Vệ sinh kỹ', st_refill:'Bổ sung', st_replace:'Thay thế', st_broken:'Hư hỏng',
@@ -304,10 +310,16 @@ const I18N = {
   addBuildingBtn:'建物を追加', rename:'名前変更', del:'削除',
   addRooms:'＋ この建物に客室を追加', delWarn:'削除した建物・客室はゴミ箱に30日間保管され、その間は復元できます。',
   needName:'建物名を入力してください', needRooms:'客室を1つ以上入力してください（例：101-110）',
-  roomsAdded:'{0}室を追加しました', askRooms:'追加する客室（例：401-408）:',
-  askBuildingName:'建物名:', delBuildingAsk:'この建物と{0}室をゴミ箱に移しますか？30日以内なら復元でき、その後完全に削除されます。',
-  buildingDeleted:'建物をゴミ箱に移しました', askRoomName:'部屋番号（空欄でOKすると削除）:',
-  askCycle:'点検周期（日）:', delRoomAsk:'{0}号室をゴミ箱に移しますか？30日以内なら復元できます。',
+  roomsAdded:'{0}室を追加しました',
+  delBuildingAsk:'この建物と{0}室をゴミ箱に移しますか？30日以内なら復元でき、その後完全に削除されます。',
+  buildingDeleted:'建物をゴミ箱に移しました',
+  delRoomAsk:'{0}号室をゴミ箱に移しますか？30日以内なら復元できます。',
+  renameBuilding:'建物名の変更', addRoomsTitle:'{0}に客室を追加', roomsPreview:'{0}室を追加します: {1}',
+  editRoomTitle:'{0}号室', fRoomName:'部屋番号・名前', fCycle:'点検周期（日）',
+  delRoom:'客室をゴミ箱に移す', needRoomName:'部屋番号を入力してください',
+  addItemRoomTitle:'{0}に項目を追加', fArea:'エリア', fItemVi:'項目名（ベトナム語）',
+  fItemJa:'項目名（日本語）', itemJaHint:'日本語を空欄にすると、日本語表示でもベトナム語名が表示されます。',
+  needItemName:'項目名を入力してください',
   roomDeleted:'客室をゴミ箱に移しました', trash:'ゴミ箱', restore:'復元', restored:'復元しました',
   trashLeft:'あと{0}日で完全削除', trashBy:'削除者: {0}', trashBuilding:'建物全体',
   onDrive:'写真{0}枚はGoogleドライブに移動済み',
@@ -342,7 +354,7 @@ const I18N = {
   addStockItem:'＋ この場所に品目を追加', pickItem:'品目を選択:',
   setQty:'数量（{0}）:', qtySaved:'数量を更新しました',
   manageItems:'品目マスタ', manageItemsHint:'すべての倉庫・棚で共通の品目です。',
-  newItem:'＋ 品目を追加', askItemName:'品目名:', askUnit:'単位（本、箱、袋、ロールなど）:',
+  newItem:'＋ 品目を追加',
   askMin:'残少アラートのしきい値（0＝なし）:', itemSaved:'品目を保存しました',
   delItemAsk:'品目「{0}」をマスタから削除しますか？全倉庫の数量も失われます。',
   unitOf:'単位: {0}', minOf:'しきい値: {0}', stockHistory:'入出庫履歴',
@@ -352,8 +364,8 @@ const I18N = {
   commonCount:'共用部{0}件', commonDueN:'{0}件が点検必要',
   editItems:'点検項目を調整', itemsFor:'点検項目 · {0}',
   itemsHint:'この客室に無い項目はオフにしてください。変更はこの客室のみに適用されます。',
-  addItem:'＋ この客室だけの項目を追加', askArea:'どのエリアに追加しますか？',
-  askItem:'新しい項目名:', itemAdded:'項目を追加しました', itemOff:'項目をオフにしました',
+  addItem:'＋ この客室だけの項目を追加',
+  itemAdded:'項目を追加しました', itemOff:'項目をオフにしました',
   itemOn:'項目をオンにしました', onlyThisRoom:'この客室のみ', onlyThisBuilding:'この建物のみ',
   takePhoto:'写真を撮る', fromLibrary:'ライブラリから選択', activeItems:'{0}/{1}項目が有効',
   st_ok:'良好', st_clean:'要清掃', st_refill:'要補充', st_replace:'要交換', st_broken:'故障',
@@ -1100,26 +1112,48 @@ function vAdmin(){
     if(e2) return toast(t('err') + e2.message);
     await loadAll(); toast(t('roomsAdded', list.length)); render();
   };
-  bindAll('[data-addr]', async b => {
-    const v = prompt(t('askRooms')); if(!v) return;
-    const list = parseRooms(v); if(!list.length) return;
+  bindAll('[data-addr]', b => {
     const bid = b.dataset.addr;
-    const base = rooms.filter(r => r.building_id === bid).length;
-    busy(true);
-    const {error} = await sb.from('rooms').insert(list.map((n,i) => ({building_id:bid, name:n, sort:base+i})));
-    busy(false);
-    if(error) return toast(t('err') + error.message);
-    await loadAll(); toast(t('roomsAdded', list.length)); render();
+    const bn = rooms.find(r => r.building_id === bid)?.building_name || '';
+    sheet(t('addRoomsTitle', bn), `
+      <label class="f"><span>${t('roomList')}</span>
+        <input type="text" id="s_rooms" placeholder="401-408"></label>
+      <p class="muted" style="margin:-4px 0 12px;font-size:12.5px" id="s_prev">${t('rangeHint')}</p>`,
+    async () => {
+      const list = parseRooms($('#s_rooms').value);
+      if(!list.length) return toast(t('needRooms'));
+      const base = rooms.filter(r => r.building_id === bid).length;
+      busy(true);
+      const {error} = await sb.from('rooms').insert(list.map((n,i) => ({building_id:bid, name:n, sort:base+i})));
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      closeSheet(); await loadAll(); toast(t('roomsAdded', list.length)); render();
+    });
+    $('#s_rooms').oninput = e => {
+      const list = parseRooms(e.target.value);
+      $('#s_prev').textContent = list.length
+        ? t('roomsPreview', list.length, list.slice(0, 12).join(', ') + (list.length > 12 ? '…' : ''))
+        : t('rangeHint');
+    };
+    $('#s_rooms').focus();
   });
-  bindAll('[data-renb]', async b => {
+  bindAll('[data-renb]', b => {
     const bid = b.dataset.renb;
     const cur = rooms.find(r => r.building_id === bid)?.building_name || '';
-    const v = prompt(t('askBuildingName'), cur); if(!v || !v.trim()) return;
-    busy(true);
-    const {error} = await sb.from('buildings').update({name:v.trim()}).eq('id', bid);
-    busy(false);
-    if(error) return toast(t('err') + error.message);
-    await loadAll(); render();
+    sheet(t('renameBuilding'), `
+      <label class="f"><span>${t('buildingName')}</span>
+        <input type="text" id="s_bname" value="${esc(cur)}"></label>`,
+    async () => {
+      const v = $('#s_bname').value.trim();
+      if(!v) return toast(t('needName'));
+      if(v === cur) return closeSheet();
+      busy(true);
+      const {error} = await sb.from('buildings').update({name:v}).eq('id', bid);
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      closeSheet(); await loadAll(); render();
+    });
+    $('#s_bname').focus();
   });
   bindAll('[data-delb]', async b => {
     const bid = b.dataset.delb;
@@ -1141,27 +1175,34 @@ function vAdmin(){
     if(error) return toast(t('err') + error.message);
     await loadAll(); toast(t('restored')); render();
   });
-  bindAll('[data-editr]', async b => {
+  bindAll('[data-editr]', b => {
     const r = rooms.find(x => x.id === b.dataset.editr); if(!r) return;
-    const name = prompt(t('askRoomName'), r.name);
-    if(name === null) return;
-    busy(true);
-    if(!name.trim()){
-      if(confirm(t('delRoomAsk', r.name))){
-        const {error} = await sb.from('rooms')
-          .update({deleted_at: new Date().toISOString(), deleted_by_name: me.name}).eq('id', r.id);
-        if(error){ busy(false); return toast(t('err') + error.message) }
-        toast(t('roomDeleted'));
-      }
-    } else {
-      const cy = prompt(t('askCycle'), r.cycle_days);
-      await sb.from('rooms').update({
-        name: name.trim(),
-        cycle_days: Math.max(1, parseInt(cy) || r.cycle_days)
-      }).eq('id', r.id);
-    }
-    busy(false);
-    await loadAll(); render();
+    // Khu vực chung giữ tên 共用部, chỉ cho sửa chu kỳ
+    sheet(r.is_common ? `${r.building_name} · ${t('commonArea')}` : t('editRoomTitle', r.name), `
+      ${r.is_common ? '' : `<label class="f"><span>${t('fRoomName')}</span>
+        <input type="text" id="s_rname" value="${esc(r.name)}"></label>`}
+      <label class="f"><span>${t('fCycle')}</span>
+        <input type="number" id="s_cycle" inputmode="numeric" min="1" value="${r.cycle_days}"></label>
+      <button class="btn danger" id="s_del" style="margin-bottom:10px">${t('delRoom')}</button>`,
+    async () => {
+      const name = r.is_common ? r.name : $('#s_rname').value.trim();
+      if(!name) return toast(t('needRoomName'));
+      const cycle_days = Math.max(1, parseInt($('#s_cycle').value) || r.cycle_days);
+      busy(true);
+      const {error} = await sb.from('rooms').update({name, cycle_days}).eq('id', r.id);
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      closeSheet(); await loadAll(); render();
+    });
+    $('#s_del').onclick = async () => {
+      if(!confirm(t('delRoomAsk', rname(r)))) return;
+      busy(true);
+      const {error} = await sb.from('rooms')
+        .update({deleted_at: new Date().toISOString(), deleted_by_name: me.name}).eq('id', r.id);
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      closeSheet(); await loadAll(); toast(t('roomDeleted')); render();
+    };
   });
 }
 
@@ -1196,24 +1237,34 @@ function vItems(){
     if(off) exSet.delete(key); else exSet.add(key);
     toast(off ? t('itemOn') : t('itemOff')); render();
   });
-  $('#addi').onclick = async () => {
+  $('#addi').onclick = () => {
     const areas = [...new Set(all.map(i => i.area))];
-    const a = prompt(t('askArea') + '\n' + areas.map((x,i) => (i+1)+'. '+areaName(x)).join('\n'), '1');
-    if(a === null) return;
-    const area = areas[Math.max(0, (parseInt(a)||1) - 1)];
-    const name = prompt(t('askItem')); if(!name || !name.trim()) return;
-    const sameArea = all.filter(i => i.area === area);
-    busy(true);
-    const {error} = await sb.from('checklist').insert({
-      area, item: name.trim(),
-      area_ja: AJ.get(area) || null, item_ja: lang === 'ja' ? name.trim() : null,
-      area_sort: sameArea[0]?.area_sort ?? 99,
-      item_sort: (sameArea[sameArea.length-1]?.item_sort ?? 0) + 1,
-      common_only: !!r.is_common, scope_room_id: r.id
+    sheet(t('addItemRoomTitle', rname(r)), `
+      <label class="f"><span>${t('fArea')}</span>
+        <select id="s_area">${areas.map(a => `<option value="${esc(a)}">${esc(areaName(a))}</option>`).join('')}</select></label>
+      <label class="f"><span>${t('fItemVi')}</span>
+        <input type="text" id="s_item" autocapitalize="sentences"></label>
+      <label class="f"><span>${t('fItemJa')}</span>
+        <input type="text" id="s_item_ja"></label>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12.5px">${t('itemJaHint')}</p>`,
+    async () => {
+      const vi = $('#s_item').value.trim(), ja = $('#s_item_ja').value.trim();
+      if(!vi && !ja) return toast(t('needItemName'));
+      const area = $('#s_area').value;
+      const sameArea = all.filter(i => i.area === area);
+      busy(true);
+      const {error} = await sb.from('checklist').insert({
+        area, item: vi || ja,
+        area_ja: AJ.get(area) || null, item_ja: ja || null,
+        area_sort: sameArea[0]?.area_sort ?? 99,
+        item_sort: (sameArea[sameArea.length-1]?.item_sort ?? 0) + 1,
+        common_only: !!r.is_common, scope_room_id: r.id
+      });
+      busy(false);
+      if(error) return toast(t('err') + error.message);
+      closeSheet(); await loadAll(); toast(t('itemAdded')); render();
     });
-    busy(false);
-    if(error) return toast(t('err') + error.message);
-    await loadAll(); toast(t('itemAdded')); render();
+    $('#s_item').focus();
   };
 }
 
@@ -1230,7 +1281,12 @@ function sheet(title, html, onSave){
   el.classList.add('on');
   el.onclick = e => { if(e.target === el) closeSheet() };
   $('#shX').onclick = closeSheet;
-  $('#shOK').onclick = onSave;
+  // Khoá nút trong lúc lưu để bấm hai lần không ghi trùng
+  $('#shOK').onclick = async () => {
+    const b = $('#shOK'); if(!b || b.disabled) return;
+    b.disabled = true;
+    try { await onSave() } finally { if(b.isConnected) b.disabled = false }
+  };
 }
 const UNITS = ['cái','chai','bịch','cuộn','hộp','gói','túi','thùng','bộ','kg'];
 const unitPills = id => `<div class="pillrow" style="margin:-4px 0 12px">${UNITS.map(u =>
